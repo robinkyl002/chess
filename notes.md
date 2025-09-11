@@ -6,3 +6,36 @@
 - For the test, we can use the generate functionality of IntelliJ (`cmd + N`) to populate the hashCode, equals, and override functions.
 - To generate variables for the class constructor, right click on constructor and select Show Context Actions, then Bind 
 
+### Class Notes - 9/10/25
+- static function can be called without needing to create object of the class type
+
+#### Overload methods, constructors
+- Default Constructor (does nothing)
+- parameterized constructor (same setup, just takes in parameter and uses it)
+- Copy constructor (create copy of object)
+
+#### Enum
+- all values possible for this type, prevents typos
+- Enum.valueOf() calls the 
+- Checking the Peak enum (class) - `Peak.class`
+
+#### Encapsulation
+- Prevent external code from being concerned with internal workings of an object
+- clone/copy the scores to prevent changing the object directly
+- `extends` is keyword in Java for inheritance
+
+#### Comparing
+- `==` does well at comparing primitive types, but not objects
+- Use equals() method when comparing objects, makes sure to override to compare what you want to
+
+#### Records
+- Immutable objects
+- simple, safe to share and publish freely without need to make defensive copies
+
+#### Data structure for board
+- two-dimensional array
+
+#### Rules of moves
+- Math is your friend
+- simplify map (how do the numbers change as you move across the board?)
+- 
