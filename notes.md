@@ -38,4 +38,26 @@
 #### Rules of moves
 - Math is your friend
 - simplify map (how do the numbers change as you move across the board?)
+
+
+### Class Notes - 9/16/25
+
+#### Interface (implements)
+- Definition, implement the functionality in an actual class
+- Functionality
+- Need to set up each function when function is implemented
+- Abstraction so that the functionality is available to any classes that implement the interface
+- Once you set the type to the type of the interface, it doesn't need to know the implementation
+- If you reference object as the type of the interface, you can't use functions specific to the class
+
+#### Inheritance (extends)
+- Gain qualities from another class that say certain things about it
+- color printer extends printer
+- super is key word, used to get functionality from class that was extended from or access variables in the superclass
+- Extend is always extending a class, implement is used for interface
+
+#### Abstract classes
+- combination of inheritance and interface
+- define as abstract 
+- Can't define an object of abstract class, but can be extended by other class which will need to implement abstract function(s)
 - 
