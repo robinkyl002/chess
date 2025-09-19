@@ -90,7 +90,8 @@ public class ChessPiece {
                 QueenMovesCalculator queenMoves = new QueenMovesCalculator();
                 return queenMoves.moves(board, myPosition);
             case PieceType.KING:
-
+                KingMovesCalculator kingMoves = new KingMovesCalculator();
+                return kingMoves.moves(board, myPosition);
             case PieceType.KNIGHT:
 
             case PieceType.PAWN:
