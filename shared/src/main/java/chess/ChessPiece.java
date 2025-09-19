@@ -78,21 +78,17 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        var moves = new HashSet<ChessMove>();
 
         switch (type) {
-            case PieceType.BISHOP:
-                break;
-            case PieceType.ROOK:
-                break;
-            case PieceType.KING:
-            case PieceType.PAWN:
-            case PieceType.QUEEN:
-            case PieceType.KNIGHT:
-                break;
-        }
-        moves.add(new ChessMove(new ChessPosition(5,4), new ChessPosition(6,5), null));
+            case PieceType.BISHOP :
+                BishopMovesCalculator bishopMoves = new BishopMovesCalculator();
+                return bishopMoves.moves(board, myPosition);
 
-        return moves;
+            case PieceType.ROOK, PieceType.KING, PieceType.PAWN, PieceType.QUEEN, PieceType.KNIGHT:
+                return null;
+            default:
+                return null;
+        }
+        //moves.add(new ChessMove(new ChessPosition(5,4), new ChessPosition(6,5), null));
     }
 }
