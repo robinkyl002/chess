@@ -83,8 +83,10 @@ public class ChessPiece {
             case PieceType.BISHOP :
                 BishopMovesCalculator bishopMoves = new BishopMovesCalculator();
                 return bishopMoves.moves(board, myPosition);
-
-            case PieceType.ROOK, PieceType.KING, PieceType.PAWN, PieceType.QUEEN, PieceType.KNIGHT:
+            case PieceType.ROOK:
+                RookMovesCalculator rookMoves = new RookMovesCalculator();
+                return rookMoves.moves(board, myPosition);
+            case PieceType.KING, PieceType.PAWN, PieceType.QUEEN, PieceType.KNIGHT:
                 return null;
             default:
                 return null;
