@@ -86,7 +86,14 @@ public class ChessPiece {
             case PieceType.ROOK:
                 RookMovesCalculator rookMoves = new RookMovesCalculator();
                 return rookMoves.moves(board, myPosition);
-            case PieceType.KING, PieceType.PAWN, PieceType.QUEEN, PieceType.KNIGHT:
+            case PieceType.QUEEN:
+                QueenMovesCalculator queenMoves = new QueenMovesCalculator();
+                return queenMoves.moves(board, myPosition);
+            case PieceType.KING:
+
+            case PieceType.KNIGHT:
+
+            case PieceType.PAWN:
                 return null;
             default:
                 return null;
