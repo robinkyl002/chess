@@ -67,7 +67,8 @@ public class PawnMovesCalculator implements MovementRule{
         moves.add(new ChessMove(pos,newPos, ChessPiece.PieceType.ROOK));
     }
 
-    private void capturePiece(ChessBoard board, ChessPiece currPiece, Collection<ChessMove> moves, ChessPosition pos, int horizontal, int vertical, boolean promotion) {
+    private void capturePiece(ChessBoard board, ChessPiece currPiece, Collection<ChessMove> moves,
+                              ChessPosition pos, int horizontal, int vertical, boolean promotion) {
         ChessPosition diagonalPosition = new ChessPosition(pos.getRow() + Integer.signum(horizontal), pos.getColumn()+ Integer.signum(vertical));
         if (board.getPiece(diagonalPosition) != null) {
             if (!currPiece.getTeamColor().equals(board.getPiece(diagonalPosition).getTeamColor())) {
@@ -81,7 +82,8 @@ public class PawnMovesCalculator implements MovementRule{
         }
     }
 
-    private void diagonalMoves(ChessGame.TeamColor color, ChessBoard board, ChessPiece currPiece, Collection<ChessMove> moves, ChessPosition pos, boolean promotion) {
+    private void diagonalMoves(ChessGame.TeamColor color, ChessBoard board, ChessPiece currPiece,
+                               Collection<ChessMove> moves, ChessPosition pos, boolean promotion) {
         int horizontal = (color == ChessGame.TeamColor.WHITE) ? 1 : -1;
 
         if (pos.getColumn() + 1 <=8) {
