@@ -3,7 +3,8 @@ package chess;
 import java.util.Collection;
 
 public abstract class MovesCalculator implements MovementRule {
-    protected void calculateMoves(ChessBoard board, ChessPosition pos, int rowIncrement, int colIncrement, Collection<ChessMove> moves, boolean allowDistance) {
+    protected void calculateMoves(ChessBoard board, ChessPosition pos, int rowIncrement, int colIncrement,
+                                  Collection<ChessMove> moves, boolean allowDistance) {
         if (pos.getRow() + rowIncrement > 8 || pos.getRow() + rowIncrement < 1 ||
                 pos.getColumn() + colIncrement > 8 || pos.getColumn() + colIncrement < 1) {
             return;
