@@ -26,7 +26,9 @@ public class PawnMovesCalculator implements MovementRule{
 
             } else if (pos.getRow() + 1 == 8){
                 ChessPosition newPos = new ChessPosition(pos.getRow() + 1, pos.getColumn());
-                addPromotionMoves(pos, newPos, moves);
+                if (board.getPiece(newPos) == null) {
+                    addPromotionMoves(pos, newPos, moves);
+                }
 
                 diagonalMoves(ChessGame.TeamColor.WHITE, board, currPiece, moves, pos, true);
             }
@@ -48,7 +50,9 @@ public class PawnMovesCalculator implements MovementRule{
                 diagonalMoves(ChessGame.TeamColor.BLACK, board, currPiece, moves, pos, false);
             } else if (pos.getRow() - 1 == 1){
                 ChessPosition newPos = new ChessPosition(pos.getRow()-1, pos.getColumn());
-                addPromotionMoves(pos, newPos, moves);
+                if (board.getPiece(newPos) == null) {
+                    addPromotionMoves(pos, newPos, moves);
+                }
 
                 diagonalMoves(ChessGame.TeamColor.BLACK, board, currPiece, moves, pos, true);
             }
