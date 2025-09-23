@@ -1,7 +1,6 @@
 package chess;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Objects;
 
 /**
@@ -21,10 +20,7 @@ public class ChessPiece {
 
     @Override
     public String toString() {
-        return "ChessPiece{" +
-                "pieceColor=" + pieceColor +
-                ", type=" + type +
-                '}';
+        return String.format("Current Piece {color=%s, type=%s}", pieceColor, type);
     }
 
     @Override
