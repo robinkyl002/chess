@@ -61,3 +61,56 @@
 - define as abstract 
 - Can't define an object of abstract class, but can be extended by other class which will need to implement abstract function(s)
 - 
+
+### Class Note - 9/23/25
+
+#### Domain Driven Design 
+- Decompose the structure of something and how that will look in context of actors, tasks, objects, and interactions
+- Properties - what it is
+- Methods - what it does
+- Sequence diagram - functionality across time (functions on top happen first, then progress down the list)
+
+| Relationship | Description                                                       | Example                   |
+|--------------|-------------------------------------------------------------------|---------------------------|
+| Is-A         | Inheritance (often represented by extending)                      | Programmer is Person      |
+| Has-A        | Encapsulation (often represented by field)                        | Programmer has Computer   |
+| Uses-A       | Transient association (often represented with a method parameter) | Person uses Car to travel |
+
+#### Design Principles
+- Decomposition: break more complicated code into smaller pieces
+  - Prevents external code from being concerned with the internal workings of an object
+- Simplicity: Keep it simple smarty
+  - Everything should be made as simple as possible, but not simpler
+- YAGNI: You're not going to need it
+  - Always implement things when you actually need them, never when you just foresee that you need them.
+  - Don't try to pre-optimize your code for the future.
+- DRY: Don't repeat yourself
+  - When you copy and paste, you're programming by coincidence
+  - Break down into smaller functions if different areas are doing the same thing
+  - Make sure that, as functionality changes, you don't overcomplicate the solution if you just need to create separate functionality
+- High Cohesion low coupling
+  - Cohesion is the glue that holds a module together. Coupling is the degree to which one module relies on another.
+  - Things that work together for similar functionality
+- Single Responsibility
+  - A module should be responsible to one, and only one, actor.
+  - Actor has only one reason to use you.
+    - Chess Program - Participant (Observer, Player) both use same ChessGame object
+- Open closed 
+  - You should be able to extend the behavior of a system without having to modify that system.
+  - open for extension, closed for modification
+    - Write class, don't let people change it. They can extend and create their own functionality
+- Liskov substitution
+  - Actually implement interface
+  - If a subclass violates the expectations of an interface (e.g., changes meaning, throws unexpected errors, refuses to do part of the job), it breaks LSP.
+- Interface Segregation
+  - Keep interfaces cohesive
+  - Clients should not be forced to depend on methods they do not use.
+- Dependency Inversion
+  - Make dependencies parameters
+  - High-level modules should not depend on low-level modules. Both should depend on abstractions.
+  - Persist data - When move is made, you don't need to know very specifically where the data will be stored, put that in the main functionality
+- POLA: Principle of least astonishment
+  - If your API makes people scream ‘Wait, WHAT?’, you’ve broken POLA.
+- Make a Move
+  - GetPiece, addPiece
+  - add a movePiece function to set previous spot to null and set new position to contain this piece
