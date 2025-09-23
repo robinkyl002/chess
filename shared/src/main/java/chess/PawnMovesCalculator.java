@@ -22,22 +22,13 @@ public class PawnMovesCalculator implements MovementRule{
                     }
                 }
 
-                if (pos.getColumn() + 1 <=8) {
-                    capturePiece(board, currPiece, moves, pos, 1, 1, false);
-                }
-                if (pos.getColumn() - 1 >= 1) {
-                    capturePiece(board, currPiece, moves, pos, 1, -1, false);
-                }
+                diagonalMoves(ChessGame.TeamColor.WHITE, board, currPiece, moves, pos, false);
 
             } else if (pos.getRow() + 1 == 8){
                 ChessPosition newPos = new ChessPosition(pos.getRow() + 1, pos.getColumn());
                 addPromotionMoves(pos, newPos, moves);
-                if (pos.getColumn() + 1 <=8) {
-                    capturePiece(board, currPiece, moves, pos, 1, 1, true);
-                }
-                if (pos.getColumn() - 1 >= 1) {
-                    capturePiece(board, currPiece, moves, pos, 1, -1, true);
-                }
+
+                diagonalMoves(ChessGame.TeamColor.WHITE, board, currPiece, moves, pos, true);
             }
         }
         else {
@@ -54,21 +45,12 @@ public class PawnMovesCalculator implements MovementRule{
                     }
                 }
 
-                if (pos.getColumn() + 1 <=8) {
-                    capturePiece(board, currPiece, moves, pos, -1, 1, false);
-                }
-                if (pos.getColumn() - 1 >= 1) {
-                    capturePiece(board, currPiece, moves, pos, -1, -1, false);
-                }
+                diagonalMoves(ChessGame.TeamColor.BLACK, board, currPiece, moves, pos, false);
             } else if (pos.getRow() - 1 == 1){
                 ChessPosition newPos = new ChessPosition(pos.getRow()-1, pos.getColumn());
                 addPromotionMoves(pos, newPos, moves);
-                if (pos.getColumn() + 1 <=8) {
-                    capturePiece(board, currPiece, moves, pos, -1, 1, true);
-                }
-                if (pos.getColumn() - 1 >= 1) {
-                    capturePiece(board, currPiece, moves, pos, -1, -1, true);
-                }
+
+                diagonalMoves(ChessGame.TeamColor.BLACK, board, currPiece, moves, pos, true);
             }
         }
         return moves;
@@ -82,16 +64,27 @@ public class PawnMovesCalculator implements MovementRule{
     }
 
     private void capturePiece(ChessBoard board, ChessPiece currPiece, Collection<ChessMove> moves, ChessPosition pos, int horizontal, int vertical, boolean promotion) {
-        ChessPosition diagonalRight = new ChessPosition(pos.getRow() + Integer.signum(horizontal), pos.getColumn()+ Integer.signum(vertical));
-        if (board.getPiece(diagonalRight) != null) {
-            if (!currPiece.getTeamColor().equals(board.getPiece(diagonalRight).getTeamColor())) {
+        ChessPosition diagonalPosition = new ChessPosition(pos.getRow() + Integer.signum(horizontal), pos.getColumn()+ Integer.signum(vertical));
+        if (board.getPiece(diagonalPosition) != null) {
+            if (!currPiece.getTeamColor().equals(board.getPiece(diagonalPosition).getTeamColor())) {
                 if (promotion) {
-                    addPromotionMoves(pos, diagonalRight, moves);
+                    addPromotionMoves(pos, diagonalPosition, moves);
                 }
                 else {
-                    moves.add(new ChessMove(pos, diagonalRight, null));
+                    moves.add(new ChessMove(pos, diagonalPosition, null));
                 }
             }
+        }
+    }
+
+    private void diagonalMoves(ChessGame.TeamColor color, ChessBoard board, ChessPiece currPiece, Collection<ChessMove> moves, ChessPosition pos, boolean promotion) {
+        int horizontal = (color == ChessGame.TeamColor.WHITE) ? 1 : -1;
+
+        if (pos.getColumn() + 1 <=8) {
+            capturePiece(board, currPiece, moves, pos, horizontal, 1, promotion);
+        }
+        if (pos.getColumn() - 1 >= 1) {
+            capturePiece(board, currPiece, moves, pos, horizontal, -1, promotion);
         }
     }
 }
