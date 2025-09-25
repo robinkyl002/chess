@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -9,16 +10,18 @@ import java.util.Collection;
  * signature of the existing methods.
  */
 public class ChessGame {
-
+    private ChessBoard gameBoard = new ChessBoard();
+    private TeamColor currTeam;
     public ChessGame() {
-
+        gameBoard.resetBoard();
+        currTeam = TeamColor.WHITE;
     }
 
     /**
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        throw new RuntimeException("Not implemented");
+        return currTeam;
     }
 
     /**
@@ -27,7 +30,7 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        throw new RuntimeException("Not implemented");
+        currTeam = team;
     }
 
     /**
@@ -46,7 +49,15 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        ChessPiece piece = gameBoard.getPiece(startPosition);
+
+        if (piece == null) {
+            return null;
+        }
+
+        Collection<ChessMove> moves = piece.pieceMoves(gameBoard, startPosition);
+
+        return moves;
     }
 
     /**
@@ -96,7 +107,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        gameBoard = board;
     }
 
     /**
@@ -105,6 +116,23 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        throw new RuntimeException("Not implemented");
+        return gameBoard;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        ChessGame chessGame = (ChessGame) o;
+        return Objects.equals(gameBoard, chessGame.gameBoard) && currTeam == chessGame.currTeam;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hashCode(gameBoard);
+        result = 31 * result + Objects.hashCode(currTeam);
+        return result;
     }
 }
