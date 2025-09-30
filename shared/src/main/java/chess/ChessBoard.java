@@ -11,7 +11,12 @@ import java.util.Arrays;
 public class ChessBoard {
 
     private final ChessPiece [][] board = new ChessPiece[8][8];
-    public ChessBoard() {}
+    private ChessPosition whiteKingPosition;
+    private ChessPosition blackKingPosition;
+    public ChessBoard() {
+        whiteKingPosition = null;
+        blackKingPosition = null;
+    }
 
     /**
      * Adds a chess piece to the chessboard
@@ -21,6 +26,19 @@ public class ChessBoard {
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
         board[position.getRow() - 1][position.getColumn() - 1] = piece;
+
+        if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+            if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                whiteKingPosition = position;
+            }
+            else {
+                blackKingPosition = position;
+            }
+        }
+    }
+
+    ChessPosition getKingPosition(ChessGame.TeamColor color) {
+        return (color == ChessGame.TeamColor.WHITE) ? whiteKingPosition : blackKingPosition;
     }
 
     /**
@@ -34,12 +52,18 @@ public class ChessBoard {
         return board[position.getRow() - 1][position.getColumn() - 1];
     }
 
-    public void movePiece(ChessPosition startPos, ChessPosition endPos) {
+    public void movePiece(ChessPosition startPos, ChessPosition endPos, ChessPiece.PieceType promotionPiece) {
 
         ChessPiece currPiece = board[startPos.getRow()-1][startPos.getColumn()-1];
 
-        board[endPos.getRow()-1][endPos.getColumn()-1] = currPiece;
-        board[startPos.getRow()-1][startPos.getColumn()-1] = null;
+        if (currPiece.getPieceType() == ChessPiece.PieceType.PAWN) {
+            board[endPos.getRow()-1][endPos.getColumn()-1] = currPiece;
+            board[startPos.getRow()-1][startPos.getColumn()-1] = null;
+        }
+        else {
+            board[endPos.getRow()-1][endPos.getColumn()-1] = currPiece;
+            board[startPos.getRow()-1][startPos.getColumn()-1] = null;
+        }
     }
 
     /**
