@@ -75,28 +75,31 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
 
-        switch (type) {
-            case PieceType.BISHOP :
+        return switch (type) {
+            case PieceType.BISHOP -> {
                 BishopMovesCalculator bishopMoves = new BishopMovesCalculator();
-                return bishopMoves.moves(board, myPosition);
-            case PieceType.ROOK:
+                yield bishopMoves.moves(board, myPosition);
+            }
+            case PieceType.ROOK -> {
                 RookMovesCalculator rookMoves = new RookMovesCalculator();
-                return rookMoves.moves(board, myPosition);
-            case PieceType.QUEEN:
+                yield rookMoves.moves(board, myPosition);
+            }
+            case PieceType.QUEEN -> {
                 QueenMovesCalculator queenMoves = new QueenMovesCalculator();
-                return queenMoves.moves(board, myPosition);
-            case PieceType.KING:
+                yield queenMoves.moves(board, myPosition);
+            }
+            case PieceType.KING -> {
                 KingMovesCalculator kingMoves = new KingMovesCalculator();
-                return kingMoves.moves(board, myPosition);
-            case PieceType.KNIGHT:
+                yield kingMoves.moves(board, myPosition);
+            }
+            case PieceType.KNIGHT -> {
                 KnightMovesCalculator knightMoves = new KnightMovesCalculator();
-                return knightMoves.moves(board, myPosition);
-            case PieceType.PAWN:
+                yield knightMoves.moves(board, myPosition);
+            }
+            case PieceType.PAWN -> {
                 PawnMovesCalculator pawnMoves = new PawnMovesCalculator();
-                return pawnMoves.moves(board, myPosition);
-            default:
-                return null;
-        }
-        //moves.add(new ChessMove(new ChessPosition(5,4), new ChessPosition(6,5), null));
+                yield pawnMoves.moves(board, myPosition);
+            }
+        };
     }
 }
