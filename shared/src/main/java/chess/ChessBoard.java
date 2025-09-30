@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * A chessboard that can hold and rearrange chess pieces.
@@ -80,8 +81,8 @@ public class ChessBoard {
         }
 
         for (int i = 0; i < backRow.length; i++) {
-            board[0][i] = new ChessPiece(ChessGame.TeamColor.WHITE, backRow[i]);
-            board[7][i] = new ChessPiece(ChessGame.TeamColor.BLACK, backRow[i]);
+            addPiece(new ChessPosition(1, i+1), new ChessPiece(ChessGame.TeamColor.WHITE, backRow[i]));
+            addPiece(new ChessPosition(8, i+1), new ChessPiece(ChessGame.TeamColor.BLACK, backRow[i]));
         }
 
         Arrays.fill(board[1], new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
@@ -95,11 +96,14 @@ public class ChessBoard {
         }
 
         ChessBoard that = (ChessBoard) o;
-        return Arrays.deepEquals(board, that.board);
+        return Arrays.deepEquals(board, that.board) && Objects.equals(whiteKingPosition, that.whiteKingPosition) && Objects.equals(blackKingPosition, that.blackKingPosition);
     }
 
     @Override
     public int hashCode() {
-        return Arrays.deepHashCode(board);
+        int result = Arrays.deepHashCode(board);
+        result = 31 * result + Objects.hashCode(whiteKingPosition);
+        result = 31 * result + Objects.hashCode(blackKingPosition);
+        return result;
     }
 }
