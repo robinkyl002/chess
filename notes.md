@@ -114,3 +114,24 @@
 - Make a Move
   - GetPiece, addPiece
   - add a movePiece function to set previous spot to null and set new position to contain this piece
+
+## Phase 1
+
+### Input Output (I/O)
+- input -> taking in data of some kind and storing it
+- output -> taking data and representing in the way they know best
+
+### IO Streams
+- input stream 
+  - read bytes from input stream
+- output stream
+  - write to stream and store bytes there (bytes represented by numbers)
+- final - the pointer points to whatever object and this object can have its values edited, but the pointer cannot move
+
+### Interfaces
+- Reader
+- Writer
+- Generic for objects, specify if it is file, keyboard, etc.
+
+### Generics
+- Pass in whatever type you want
