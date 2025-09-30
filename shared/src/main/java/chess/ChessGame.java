@@ -74,9 +74,23 @@ public class ChessGame {
         ChessPosition initPosition = move.getStartPosition();
         ChessPosition endPosition = move.getEndPosition();
 
+//        if (isOutOfBounds(endPosition)) {
+//            throw new InvalidMoveException("Movement is outside of the board");
+//        }
+
+        Collection<ChessMove> validMoves = validMoves(initPosition);
+        if (validMoves == null) {
+            throw new InvalidMoveException();
+        } else {
+            boolean validMove = validMoves.contains(move);
+            if (!validMove) {
+                throw new InvalidMoveException();
+            }
+        }
+
         ChessPiece currPiece = gameBoard.getPiece(initPosition);
 
-        gameBoard.movePiece(initPosition, endPosition);
+        gameBoard.movePiece(initPosition, endPosition, move.getPromotionPiece());
 
         currTeam = (currTeam == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
     }
