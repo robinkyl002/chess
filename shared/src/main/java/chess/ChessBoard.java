@@ -66,8 +66,8 @@ public class ChessBoard {
 
         ChessPiece currPiece = board[startPos.getRow()-1][startPos.getColumn()-1];
 
-        if (currPiece.getPieceType() == ChessPiece.PieceType.PAWN) {
-            board[endPos.getRow()-1][endPos.getColumn()-1] = currPiece;
+        if (currPiece.getPieceType() == ChessPiece.PieceType.PAWN && endPos.getRow() == 1 || endPos.getRow() == 8) {
+            board[endPos.getRow()-1][endPos.getColumn()-1] = new ChessPiece(currPiece.getTeamColor(), promotionPiece);
             board[startPos.getRow()-1][startPos.getColumn()-1] = null;
         }
         else {
