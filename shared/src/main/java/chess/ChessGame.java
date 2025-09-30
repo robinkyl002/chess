@@ -92,6 +92,10 @@ public class ChessGame {
 
         gameBoard.movePiece(initPosition, endPosition, move.getPromotionPiece());
 
+        if (currPiece.getPieceType() == ChessPiece.PieceType.KING) {
+            gameBoard.setKingPosition(currPiece.getTeamColor(), endPosition);
+        }
+
         currTeam = (currTeam == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
     }
 

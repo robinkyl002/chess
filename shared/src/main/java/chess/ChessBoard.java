@@ -38,6 +38,15 @@ public class ChessBoard {
         }
     }
 
+    void setKingPosition(ChessGame.TeamColor color, ChessPosition pos) {
+        if (color == ChessGame.TeamColor.WHITE){
+            whiteKingPosition = pos;
+        }
+        else {
+            blackKingPosition = pos;
+        }
+    }
+
     ChessPosition getKingPosition(ChessGame.TeamColor color) {
         return (color == ChessGame.TeamColor.WHITE) ? whiteKingPosition : blackKingPosition;
     }
