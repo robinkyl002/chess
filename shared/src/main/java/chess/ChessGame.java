@@ -57,6 +57,10 @@ public class ChessGame {
 
         Collection<ChessMove> moves = piece.pieceMoves(gameBoard, startPosition);
 
+        for (ChessMove move : moves) {
+
+        }
+
         return moves;
     }
 
@@ -67,7 +71,14 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        ChessPosition initPosition = move.getStartPosition();
+        ChessPosition endPosition = move.getEndPosition();
+
+        ChessPiece currPiece = gameBoard.getPiece(initPosition);
+
+        gameBoard.movePiece(initPosition, endPosition);
+
+        currTeam = (currTeam == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
     }
 
     /**
