@@ -135,3 +135,9 @@
 
 ### Generics
 - Pass in whatever type you want
+
+## Phase 2 
+
+### Chess Design
+- Stalemate - any moves, check
+- separate out user/ game functionalities (user - register, login, logout; game - list games, create game, join game)
