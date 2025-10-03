@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Objects;
 
 /**
@@ -21,6 +22,7 @@ public class ChessGame {
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
+
         return currTeam;
     }
 
@@ -30,6 +32,7 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
+
         currTeam = team;
     }
 
@@ -56,12 +59,38 @@ public class ChessGame {
         }
 
         Collection<ChessMove> moves = piece.pieceMoves(gameBoard, startPosition);
+        Iterator<ChessMove> moveIterator = moves.iterator();
 
-        for (ChessMove move : moves) {
-
+        while (moveIterator.hasNext()) {
+            ChessMove move = moveIterator.next();
+            if (!testMove(move)) {
+                moveIterator.remove();
+            }
         }
 
         return moves;
+    }
+
+    private boolean testMove(ChessMove move) {
+        ChessPiece movingPiece = gameBoard.getPiece(move.getStartPosition());
+        ChessPiece capturedPiece = gameBoard.getPiece(move.getEndPosition());
+
+        performTestMove(move);
+
+        boolean validMove = !isInCheck(movingPiece.getTeamColor());
+
+        revertTestMove(movingPiece, capturedPiece, move.getStartPosition(), move.getEndPosition());
+
+        return validMove;
+    }
+
+    private void revertTestMove(ChessPiece moving, ChessPiece captured, ChessPosition start, ChessPosition end) {
+        gameBoard.addPiece(start, moving);
+        gameBoard.addPiece(end, captured);
+    }
+
+    private void performTestMove(ChessMove move) {
+        gameBoard.movePiece(move.getStartPosition(), move.getEndPosition(), move.getPromotionPiece());
     }
 
     /**
@@ -105,7 +134,33 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        return true;
+        for (int i = 1; i < 9; i++) {
+            for(int j = 1; j < 9; j++) {
+                ChessPosition pos = new ChessPosition(i, j);
+                ChessPiece selectedPiece = gameBoard.getPiece(pos);
+                if(selectedPiece != null && checkIndividualPieceForCheck(selectedPiece, pos, teamColor)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private boolean checkIndividualPieceForCheck(ChessPiece piece, ChessPosition pos, TeamColor teamColor) {
+        ChessPosition kingPos = gameBoard.getKingPosition(teamColor);
+        if (piece.getTeamColor() != teamColor) {
+            var moves = piece.pieceMoves(gameBoard, pos);
+            Iterator<ChessMove> it = moves.iterator();
+
+            while (it.hasNext()) {
+                ChessMove move = it.next();
+                if (move.getEndPosition().equals(kingPos)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
