@@ -26,6 +26,10 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
+        if (piece == null) {
+            return;
+        }
+
         board[position.getRow() - 1][position.getColumn() - 1] = piece;
 
         if (piece.getPieceType() == ChessPiece.PieceType.KING) {
