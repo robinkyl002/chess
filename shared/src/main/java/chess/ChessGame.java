@@ -90,7 +90,16 @@ public class ChessGame {
     }
 
     private void performTestMove(ChessMove move) {
-        gameBoard.movePiece(move.getStartPosition(), move.getEndPosition(), move.getPromotionPiece());
+        ChessPiece mover = gameBoard.getPiece(move.getStartPosition());
+
+        if (move.getPromotionPiece() == null) {
+            gameBoard.addPiece(move.getEndPosition(), mover);
+        }
+        else {
+            gameBoard.addPiece(move.getEndPosition(), new ChessPiece(mover.getTeamColor(), move.getPromotionPiece()));
+        }
+        gameBoard.addPiece(move.getStartPosition(), null);
+
     }
 
     /**
@@ -148,14 +157,14 @@ public class ChessGame {
     }
 
     private boolean checkIndividualPieceForCheck(ChessPiece piece, ChessPosition pos, TeamColor teamColor) {
-        ChessPosition kingPos = gameBoard.getKingPosition(teamColor);
+
         if (piece.getTeamColor() != teamColor) {
             var moves = piece.pieceMoves(gameBoard, pos);
             Iterator<ChessMove> it = moves.iterator();
 
             while (it.hasNext()) {
                 ChessMove move = it.next();
-                if (move.getEndPosition().equals(kingPos)) {
+                if (move.getEndPosition().equals(gameBoard.getKingPosition(teamColor))) {
                     return true;
                 }
             }
