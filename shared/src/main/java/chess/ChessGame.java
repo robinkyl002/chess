@@ -74,10 +74,6 @@ public class ChessGame {
         ChessPosition initPosition = move.getStartPosition();
         ChessPosition endPosition = move.getEndPosition();
 
-//        if (isOutOfBounds(endPosition)) {
-//            throw new InvalidMoveException("Movement is outside of the board");
-//        }
-
         Collection<ChessMove> validMoves = validMoves(initPosition);
         if (validMoves == null) {
             throw new InvalidMoveException();
@@ -89,6 +85,9 @@ public class ChessGame {
         }
 
         ChessPiece currPiece = gameBoard.getPiece(initPosition);
+        if (currPiece.getTeamColor() != currTeam) {
+            throw new InvalidMoveException();
+        }
 
         gameBoard.movePiece(initPosition, endPosition, move.getPromotionPiece());
 
@@ -106,7 +105,7 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        return true;
     }
 
     /**
