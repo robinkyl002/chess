@@ -110,7 +110,8 @@ public class ChessBoard {
         }
 
         ChessBoard that = (ChessBoard) o;
-        return Arrays.deepEquals(board, that.board) && Objects.equals(whiteKingPosition, that.whiteKingPosition) && Objects.equals(blackKingPosition, that.blackKingPosition);
+        return Arrays.deepEquals(board, that.board) && Objects.equals(whiteKingPosition,
+                that.whiteKingPosition) && Objects.equals(blackKingPosition, that.blackKingPosition);
     }
 
     @Override
