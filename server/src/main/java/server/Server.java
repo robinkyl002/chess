@@ -4,21 +4,21 @@ import io.javalin.*;
 
 public class Server {
 
-    private final Javalin javalin;
+    private final Javalin httpHandler;
 
     public Server() {
-        javalin = Javalin.create(config -> config.staticFiles.add("web"));
+        httpHandler = Javalin.create(config -> config.staticFiles.add("web"));
 
         // Register your endpoints and exception handlers here.
 
     }
 
     public int run(int desiredPort) {
-        javalin.start(desiredPort);
-        return javalin.port();
+        httpHandler.start(desiredPort);
+        return httpHandler.port();
     }
 
     public void stop() {
-        javalin.stop();
+        httpHandler.stop();
     }
 }
