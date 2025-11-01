@@ -27,4 +27,17 @@ public class UserService {
 
         return auth;
     }
+
+    public AuthData login(UserData loginRequest) throws DataAccessException {
+        UserData existingUser = userDataAccess.getUser(loginRequest.username());
+        if (existingUser == null) {
+            throw new DataAccessException("");
+        }
+        else if(!loginRequest.password().equals(existingUser.password())) {
+            throw new DataAccessException("Unauthorized");
+        }
+        else {
+            return authDataAccess.createAuth(existingUser.username());
+        }
+    }
 }

@@ -22,7 +22,9 @@ public class Server {
 
 
         httpHandler = Javalin.create(config -> config.staticFiles.add("web"))
-                .post("/user", this::registerUser);
+                .post("/user", this::registerUser)
+                .post("/session", this::loginUser)
+                .delete("/session", this::logoutUser);
 
         // Register your endpoints and exception handlers here.
 
@@ -45,5 +47,13 @@ public class Server {
 
         ctx.json(new Gson().toJson(auth));
         // return auth;
+    }
+
+    private void loginUser(Context ctx) throws DataAccessException {
+        UserData user = new Gson().fromJson(ctx.body(), UserData.class);
+
+        AuthData auth = userService.login(user);
+
+        ctx.json(new Gson().toJson(auth));
     }
 }
