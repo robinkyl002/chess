@@ -34,7 +34,6 @@ public class UserService {
             UserData existingUser = userDataAccess.getUser(loginRequest.username());
             if (existingUser == null) {
                 throw new ResponseException(ResponseException.Code.BadRequestError, "Error: bad request");
-
             } else if (!loginRequest.password().equals(existingUser.password())) {
                 throw new ResponseException(ResponseException.Code.UnauthorizedError, "Error: Unauthorized");
             } else {
@@ -42,8 +41,11 @@ public class UserService {
             }
         }
         catch (Exception ex) {
+            if (ex instanceof ResponseException) {
+                throw ex;
+            } else {
                 throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
-
+            }
             // throw new DataAccessException(ex.getMessage());
         }
     }

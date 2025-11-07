@@ -51,7 +51,6 @@ public class Server {
             AuthData auth = userService.createUser(user);
 
             ctx.status(200).result(new Gson().toJson(auth));
-            // return auth;
         } catch (Exception e) {
             throw e;
         }
@@ -69,7 +68,6 @@ public class Server {
             if (user.username().isEmpty() || user.password().isEmpty()) {
                 ctx.status(400).result(new Gson().toJson(Map.of("message", "Error: bad request")));
                 return;
-                // throw new DataAccessException("Error: bad request");
             }
             AuthData auth = userService.login(user);
 
