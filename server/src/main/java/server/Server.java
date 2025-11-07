@@ -46,14 +46,10 @@ public class Server {
     }
 
     private void registerUser (Context ctx) throws ResponseException, DataAccessException {
-        try {
             UserData user = new Gson().fromJson(ctx.body(), UserData.class);
             AuthData auth = userService.createUser(user);
 
             ctx.status(200).result(new Gson().toJson(auth));
-        } catch (Exception e) {
-            throw e;
-        }
     }
 
     private void exceptionHandler(ResponseException ex, Context ctx) {
