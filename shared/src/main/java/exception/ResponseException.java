@@ -22,7 +22,7 @@ public class ResponseException extends Exception {
     }
 
     public String toJson() {
-        return new Gson().toJson(Map.of("message", getMessage(), "status", toHttpStatusCode()));
+        return new Gson().toJson(Map.of("message", getMessage()));
     }
 
     public static ResponseException fromJson(String json) {
