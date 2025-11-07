@@ -46,10 +46,13 @@ public class Server {
     }
 
     private void registerUser (Context ctx) throws ResponseException, DataAccessException {
-            UserData user = new Gson().fromJson(ctx.body(), UserData.class);
-            AuthData auth = userService.createUser(user);
+        UserData user = new Gson().fromJson(ctx.body(), UserData.class);
+        if (user.username().isEmpty() || user.password().isEmpty() || user.email().isEmpty()) {
+            throw new ResponseException(ResponseException.Code.BadRequestError, "Error: bad request");
+        }
+        AuthData auth = userService.createUser(user);
 
-            ctx.status(200).result(new Gson().toJson(auth));
+        ctx.status(200).result(new Gson().toJson(auth));
     }
 
     private void exceptionHandler(ResponseException ex, Context ctx) {
@@ -58,27 +61,19 @@ public class Server {
     }
 
     private void loginUser(Context ctx) throws DataAccessException, ResponseException {
-        try {
-            UserData user = new Gson().fromJson(ctx.body(), UserData.class);
+        UserData user = new Gson().fromJson(ctx.body(), UserData.class);
 
-            if (user.username().isEmpty() || user.password().isEmpty()) {
-                ctx.status(400).result(new Gson().toJson(Map.of("message", "Error: bad request")));
-                return;
-            }
-            AuthData auth = userService.login(user);
+        if (user.username().isEmpty() || user.password().isEmpty()) {
+            throw new ResponseException(ResponseException.Code.BadRequestError, "Error: bad request");
+        }
+        AuthData auth = userService.login(user);
 
-            ctx.status(200).result(new Gson().toJson(auth));
-        }
-        catch (Exception ex) {
-            throw ex;
-        }
+        ctx.status(200).result(new Gson().toJson(auth));
     }
 
-    private void logoutUser(Context ctx) throws DataAccessException {
+    private void logoutUser(Context ctx) throws DataAccessException, ResponseException{
         String authToken = ctx.header("Authorization");
-
         userService.logout(authToken);
-
         ctx.status(200).result("");
     }
 }

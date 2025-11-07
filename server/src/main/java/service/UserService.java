@@ -17,16 +17,13 @@ public class UserService {
     }
 
     public AuthData createUser(UserData newUser) throws DataAccessException, ResponseException {
-
         UserData existingUser = userDataAccess.getUser(newUser.username());
         if (existingUser != null) {
             throw new ResponseException(ResponseException.Code.AlreadyTakenError, "Error: username already taken");
         }
         userDataAccess.createUser(newUser);
 
-        AuthData auth = authDataAccess.createAuth(newUser.username());
-
-        return auth;
+        return authDataAccess.createAuth(newUser.username());
     }
 
     public AuthData login(UserData loginRequest) throws DataAccessException, ResponseException {
@@ -46,17 +43,25 @@ public class UserService {
             } else {
                 throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
             }
-            // throw new DataAccessException(ex.getMessage());
         }
     }
 
-    public void logout(String authToken) throws DataAccessException {
-        AuthData auth = authDataAccess.getAuth(authToken);
+    public void logout(String authToken) throws DataAccessException, ResponseException {
+        try {
+            AuthData auth = authDataAccess.getAuth(authToken);
 
-        if (auth == null) {
-            throw new DataAccessException("Error: Unauthorized");
+            if (auth == null) {
+                throw new ResponseException(ResponseException.Code.UnauthorizedError, "Error: Unauthorized");
+            }
+
+            authDataAccess.deleteAuth(authToken);
         }
-
-        authDataAccess.deleteAuth(authToken);
+        catch (Exception ex) {
+            if (ex instanceof ResponseException) {
+                throw ex;
+            } else {
+                throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
+            }
+        }
     }
 }
