@@ -2,11 +2,14 @@ package server;
 
 import com.google.gson.Gson;
 import dataaccess.*;
+import exception.ResponseException;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.AuthData;
 import model.UserData;
 import service.UserService;
+
+import java.util.Map;
 
 public class Server {
 
@@ -24,7 +27,8 @@ public class Server {
         httpHandler = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", this::registerUser)
                 .post("/session", this::loginUser)
-                .delete("/session", this::logoutUser);
+                .delete("/session", this::logoutUser)
+                .exception(ResponseException.class, this::exceptionHandler);
 
         // Register your endpoints and exception handlers here.
 
@@ -41,19 +45,46 @@ public class Server {
         httpHandler.stop();
     }
 
-    private void registerUser (Context ctx) throws DataAccessException {
-        UserData user = new Gson().fromJson(ctx.body(), UserData.class);
-        AuthData auth = userService.createUser(user);
+    private void registerUser (Context ctx) throws ResponseException, DataAccessException {
+        try {
+            UserData user = new Gson().fromJson(ctx.body(), UserData.class);
+            AuthData auth = userService.createUser(user);
 
-        ctx.json(new Gson().toJson(auth));
-        // return auth;
+            ctx.status(200).result(new Gson().toJson(auth));
+            // return auth;
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
-    private void loginUser(Context ctx) throws DataAccessException {
-        UserData user = new Gson().fromJson(ctx.body(), UserData.class);
+    private void exceptionHandler(ResponseException ex, Context ctx) {
+        ctx.status(ex.toHttpStatusCode());
+        ctx.result(ex.toJson());
+    }
 
-        AuthData auth = userService.login(user);
+    private void loginUser(Context ctx) throws DataAccessException, ResponseException {
+        try {
+            UserData user = new Gson().fromJson(ctx.body(), UserData.class);
 
-        ctx.json(new Gson().toJson(auth));
+            if (user.username().isEmpty() || user.password().isEmpty()) {
+                ctx.status(400).result(new Gson().toJson(Map.of("message", "Error: bad request")));
+                return;
+                // throw new DataAccessException("Error: bad request");
+            }
+            AuthData auth = userService.login(user);
+
+            ctx.status(200).result(new Gson().toJson(auth));
+        }
+        catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    private void logoutUser(Context ctx) throws DataAccessException {
+        String authToken = ctx.header("Authorization");
+
+        userService.logout(authToken);
+
+        ctx.status(200).result("");
     }
 }
