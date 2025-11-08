@@ -27,7 +27,11 @@ public class Server {
         httpHandler = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", this::registerUser)
                 .post("/session", this::loginUser)
+                .post("/game", this::createGame)
+                .put("/game", this::joinGame)
+                .get("/game", this::listGames)
                 .delete("/session", this::logoutUser)
+                .delete("/db", this::clear)
                 .exception(ResponseException.class, this::exceptionHandler);
 
         // Register your endpoints and exception handlers here.
@@ -75,5 +79,21 @@ public class Server {
         String authToken = ctx.header("Authorization");
         userService.logout(authToken);
         ctx.status(200).result("");
+    }
+
+    private void createGame(Context ctx) throws DataAccessException, ResponseException {
+
+    }
+
+    private void listGames(Context ctx) throws DataAccessException, ResponseException {
+
+    }
+
+    private void joinGame(Context ctx) throws DataAccessException, ResponseException {
+
+    }
+
+    private void clear(Context ctx) throws DataAccessException, ResponseException {
+
     }
 }
