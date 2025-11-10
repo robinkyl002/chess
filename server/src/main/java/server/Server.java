@@ -51,7 +51,11 @@ public class Server {
 
     private void registerUser (Context ctx) throws ResponseException, DataAccessException {
         UserData user = new Gson().fromJson(ctx.body(), UserData.class);
-        if (user.username().isEmpty() || user.password().isEmpty() || user.email().isEmpty()) {
+
+        if (user.username() == null || user.password() == null || user.email() == null) {
+            throw new ResponseException(ResponseException.Code.BadRequestError, "Error: bad request");
+        }
+        else if (user.username().isEmpty() || user.password().isEmpty() || user.email().isEmpty()) {
             throw new ResponseException(ResponseException.Code.BadRequestError, "Error: bad request");
         }
         AuthData auth = userService.createUser(user);
@@ -67,7 +71,10 @@ public class Server {
     private void loginUser(Context ctx) throws DataAccessException, ResponseException {
         UserData user = new Gson().fromJson(ctx.body(), UserData.class);
 
-        if (user.username().isEmpty() || user.password().isEmpty()) {
+        if (user.username() == null || user.password() == null) {
+            throw new ResponseException(ResponseException.Code.BadRequestError, "Error: bad request");
+        }
+        else if (user.username().isEmpty() || user.password().isEmpty()) {
             throw new ResponseException(ResponseException.Code.BadRequestError, "Error: bad request");
         }
         AuthData auth = userService.login(user);
@@ -82,10 +89,12 @@ public class Server {
     }
 
     private void createGame(Context ctx) throws DataAccessException, ResponseException {
+        String authToken = ctx.header("Authorization");
 
     }
 
     private void listGames(Context ctx) throws DataAccessException, ResponseException {
+        String authToken = ctx.header("Authorization");
 
     }
 

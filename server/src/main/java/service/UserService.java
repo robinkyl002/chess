@@ -29,9 +29,7 @@ public class UserService {
     public AuthData login(UserData loginRequest) throws DataAccessException, ResponseException {
         try {
             UserData existingUser = userDataAccess.getUser(loginRequest.username());
-            if (existingUser == null) {
-                throw new ResponseException(ResponseException.Code.BadRequestError, "Error: bad request");
-            } else if (!loginRequest.password().equals(existingUser.password())) {
+            if (existingUser == null || !loginRequest.password().equals(existingUser.password())) {
                 throw new ResponseException(ResponseException.Code.UnauthorizedError, "Error: Unauthorized");
             } else {
                 return authDataAccess.createAuth(existingUser.username());
