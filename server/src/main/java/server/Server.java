@@ -5,23 +5,21 @@ import dataaccess.*;
 import exception.ResponseException;
 import io.javalin.*;
 import io.javalin.http.Context;
-import model.AuthData;
-import model.UserData;
-import service.UserService;
-
-import java.util.Map;
+import model.*;
+import service.*;
 
 public class Server {
 
     private final Javalin httpHandler;
     private final UserService userService;
-    private final UserDAO userDataAccess;
-    private final AuthDAO authDataAccess;
+    private final GameService gameService;
 
     public Server() {
-        userDataAccess = new MemoryUserDataAccess();
-        authDataAccess = new MemoryAuthDataAccess();
+        UserDAO userDataAccess = new MemoryUserDataAccess();
+        AuthDAO authDataAccess = new MemoryAuthDataAccess();
+        GameDAO gameDataAccess = new MemoryGameDataAccess();
         userService = new UserService(userDataAccess, authDataAccess);
+        gameService = new GameService(gameDataAccess, authDataAccess);
 
 
         httpHandler = Javalin.create(config -> config.staticFiles.add("web"))
@@ -33,8 +31,6 @@ public class Server {
                 .delete("/session", this::logoutUser)
                 .delete("/db", this::clear)
                 .exception(ResponseException.class, this::exceptionHandler);
-
-        // Register your endpoints and exception handlers here.
 
     }
 
@@ -84,22 +80,53 @@ public class Server {
 
     private void logoutUser(Context ctx) throws DataAccessException, ResponseException{
         String authToken = ctx.header("Authorization");
-        userService.logout(authToken);
-        ctx.status(200).result("");
+
+        if (userService.validAuth(authToken)) {
+            userService.logout(authToken);
+            ctx.status(200).result("");
+        }
+        else {
+            throw new ResponseException(ResponseException.Code.UnauthorizedError, "Error: Unauthorized");
+        }
     }
 
     private void createGame(Context ctx) throws DataAccessException, ResponseException {
         String authToken = ctx.header("Authorization");
 
+        if (userService.validAuth(authToken)) {
+            NewGameRequest gameRequest = new Gson().fromJson(ctx.body(), NewGameRequest.class);
+
+            NewGameResult newGame = gameService.newGame(gameRequest.gameName());
+            ctx.status(200).result(new Gson().toJson(newGame));
+        }
+        else {
+            throw new ResponseException(ResponseException.Code.UnauthorizedError, "Error: Unauthorized");
+        }
     }
 
     private void listGames(Context ctx) throws DataAccessException, ResponseException {
         String authToken = ctx.header("Authorization");
 
+        if (userService.validAuth(authToken)) {
+
+            ctx.status(200);
+        }
+        else {
+            throw new ResponseException(ResponseException.Code.UnauthorizedError, "Error: Unauthorized");
+        }
+
     }
 
     private void joinGame(Context ctx) throws DataAccessException, ResponseException {
+        String authToken = ctx.header("Authorization");
 
+        if (userService.validAuth(authToken)) {
+
+            ctx.status(200);
+        }
+        else {
+            throw new ResponseException(ResponseException.Code.UnauthorizedError, "Error: Unauthorized");
+        }
     }
 
     private void clear(Context ctx) throws DataAccessException, ResponseException {
