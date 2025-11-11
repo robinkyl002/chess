@@ -62,4 +62,10 @@ public class UserService {
             }
         }
     }
+
+    public boolean validAuth(String authToken) throws DataAccessException {
+        AuthData auth = authDataAccess.getAuth(authToken);
+
+        return auth != null;
+    }
 }
