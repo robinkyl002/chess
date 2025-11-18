@@ -40,7 +40,9 @@ public class MemoryAuthDataAccess implements AuthDAO {
     @Override
     public void clearAuthData() throws DataAccessException {
         try {
-            authTokens.clear();
+            if (!authTokens.isEmpty()) {
+                authTokens.clear();
+            }
         } catch (Exception e) {
             throw new DataAccessException("Error: " + e.getMessage(), e);
         }
