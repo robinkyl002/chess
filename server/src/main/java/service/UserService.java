@@ -16,14 +16,14 @@ public class UserService {
         this.authDataAccess = authDataAccess;
     }
 
-    public AuthData createUser(UserData newUser) throws DataAccessException, ResponseException {
-        UserData existingUser = userDataAccess.getUser(newUser.username());
+    public AuthData createUser(String username, String password, String email) throws DataAccessException, ResponseException {
+        UserData existingUser = userDataAccess.getUser(username);
         if (existingUser != null) {
             throw new ResponseException(ResponseException.Code.AlreadyTakenError, "Error: username already taken");
         }
-        userDataAccess.createUser(newUser);
+        userDataAccess.createUser(new UserData(username, password, email));
 
-        return authDataAccess.createAuth(newUser.username());
+        return authDataAccess.createAuth(username);
     }
 
     public AuthData login(UserData loginRequest) throws DataAccessException, ResponseException {
@@ -67,5 +67,21 @@ public class UserService {
         AuthData auth = authDataAccess.getAuth(authToken);
 
         return auth != null;
+    }
+
+    public void clearUserData() throws ResponseException {
+        try {
+            userDataAccess.clearUserData();
+        } catch (DataAccessException ex) {
+            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
+        }
+    }
+
+    public void clearAuthData() throws ResponseException {
+        try {
+            authDataAccess.clearAuthData();
+        } catch (DataAccessException ex) {
+            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
+        }
     }
 }
