@@ -54,7 +54,7 @@ public class Server {
         else if (user.username().isEmpty() || user.password().isEmpty() || user.email().isEmpty()) {
             throw new ResponseException(ResponseException.Code.BadRequestError, "Error: bad request");
         }
-        AuthData auth = userService.createUser(user);
+        AuthData auth = userService.createUser(user.username(), user.password(), user.email());
 
         ctx.status(200).result(new Gson().toJson(auth));
     }
@@ -121,8 +121,10 @@ public class Server {
         String authToken = ctx.header("Authorization");
 
         if (userService.validAuth(authToken)) {
+            JoinGameRequest joinReq = new Gson().fromJson(ctx.body(), JoinGameRequest.class);
+            gameService.joinGame(joinReq, authToken);
 
-            ctx.status(200);
+            ctx.status(200).result("");
         }
         else {
             throw new ResponseException(ResponseException.Code.UnauthorizedError, "Error: Unauthorized");
@@ -130,6 +132,8 @@ public class Server {
     }
 
     private void clear(Context ctx) throws DataAccessException, ResponseException {
-
+        userService.clearUserData();
+        userService.clearAuthData();
+        gameService.clearGameData();
     }
 }
