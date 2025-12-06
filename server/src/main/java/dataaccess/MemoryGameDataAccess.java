@@ -20,7 +20,11 @@ public class MemoryGameDataAccess implements GameDAO{
 
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
-        return games.get(gameID);
+        GameData game = games.get(gameID);
+        if (game == null) {
+            throw new DataAccessException("Game not found");
+        }
+        return game;
     }
 
     @Override
@@ -29,7 +33,20 @@ public class MemoryGameDataAccess implements GameDAO{
     }
 
     @Override
+    public void updateGame(GameData updatedGame) throws DataAccessException {
+        GameData existingGame = games.get(updatedGame.gameID());
+        if (existingGame == null) {
+            throw new DataAccessException("Existing game could not be found");
+        }
+
+        games.remove(updatedGame.gameID());
+        games.put(updatedGame.gameID(), updatedGame);
+    }
+
+    @Override
     public void clearGameData() {
-        games.clear();
+        if (!games.isEmpty()) {
+            games.clear();
+        }
     }
 }
