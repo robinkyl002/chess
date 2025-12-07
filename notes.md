@@ -141,3 +141,30 @@
 ### Chess Design
 - Stalemate - any moves, check
 - separate out user/ game functionalities (user - register, login, logout; game - list games, create game, join game)
+
+## Phase 3 
+
+Code from ResponseException that may be of use later
+
+```declarative
+//    public static ResponseException fromJson(String json) {
+//        var map = new Gson().fromJson(json, HashMap.class);
+//        var status = Code.valueOf(map.get("status").toString());
+//        String message = map.get("message").toString();
+//        return new ResponseException(status, message);
+//    }
+
+//    public Code code() {
+//        return code;
+//    }
+//
+//    public static Code fromHttpStatusCode(int httpStatusCode) {
+//        return switch (httpStatusCode) {
+//            case 500 -> Code.ServerError;
+//            case 400 -> Code.BadRequestError;
+//            case 401 -> Code.UnauthorizedError;
+//            case 403 -> Code.AlreadyTakenError;
+//            default -> throw new IllegalArgumentException("Unknown HTTP status code: " + httpStatusCode);
+//        };
+//    }
+```
