@@ -13,6 +13,7 @@ public class Server {
     private final Javalin httpHandler;
     private final UserService userService;
     private final GameService gameService;
+    private final DatabaseManager dbManager;
 
     public Server() {
         UserDAO userDataAccess = new MemoryUserDataAccess();
@@ -20,6 +21,7 @@ public class Server {
         GameDAO gameDataAccess = new MemoryGameDataAccess();
         userService = new UserService(userDataAccess, authDataAccess);
         gameService = new GameService(gameDataAccess, authDataAccess);
+        dbManager = new DatabaseManager();
 
 
         httpHandler = Javalin.create(config -> config.staticFiles.add("web"))
