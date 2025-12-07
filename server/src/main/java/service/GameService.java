@@ -6,6 +6,8 @@ import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
 import exception.ResponseException;
 import model.*;
+import java.util.Collection;
+import java.util.List;
 
 public class GameService {
     private final GameDAO gameDataAccess;
@@ -16,7 +18,7 @@ public class GameService {
         this.authDataAccess = authDataAccess;
     }
 
-    public NewGameResult newGame(String gameName) throws DataAccessException, ResponseException {
+    public NewGameResult newGame(String gameName) throws ResponseException {
         if (gameName == null || gameName.isEmpty()) {
             throw new ResponseException(ResponseException.Code.BadRequestError, "Error: bad request");
         }
@@ -44,8 +46,16 @@ public class GameService {
             gameDataAccess.updateGame(updatedGame);
         }
 
+    }
 
+    public ListGamesResult listGames() {
+        Collection<GameData> games = gameDataAccess.listGames();
 
+        List<GameSummary> summaries = games.stream().map(g -> new GameSummary(
+                g.gameID(), g.whiteUsername(),
+                g.blackUsername(), g.gameName())).toList();
+
+        return new ListGamesResult(summaries);
     }
 
     public void clearGameData() throws ResponseException {
