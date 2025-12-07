@@ -39,7 +39,7 @@ public class Server {
         return httpHandler.port();
     }
 
-    public int port() { return httpHandler.port(); }
+    // public int port() { return httpHandler.port(); }
 
     public void stop() {
         httpHandler.stop();
@@ -109,7 +109,9 @@ public class Server {
 
         if (userService.validAuth(authToken)) {
 
-            ctx.status(200);
+            ListGamesResult games = gameService.listGames();
+
+            ctx.status(200).result(new Gson().toJson(games));
         }
         else {
             throw new ResponseException(ResponseException.Code.UnauthorizedError, "Error: Unauthorized");
@@ -131,7 +133,7 @@ public class Server {
         }
     }
 
-    private void clear(Context ctx) throws DataAccessException, ResponseException {
+    private void clear(Context ctx) throws ResponseException {
         userService.clearUserData();
         userService.clearAuthData();
         gameService.clearGameData();
