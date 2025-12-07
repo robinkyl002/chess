@@ -3,12 +3,12 @@ package dataaccess;
 import model.GameData;
 import model.NewGameResult;
 
-import java.util.HashSet;
+import java.util.Collection;
 
 public interface GameDAO {
     NewGameResult createGame(String data) throws DataAccessException;
     GameData getGame(int gameID) throws DataAccessException;
-    HashSet<GameData> listGames() throws DataAccessException;
+    Collection<GameData> listGames() throws DataAccessException;
     void updateGame(GameData updatedGame) throws DataAccessException;
     void clearGameData() throws DataAccessException;
 }
