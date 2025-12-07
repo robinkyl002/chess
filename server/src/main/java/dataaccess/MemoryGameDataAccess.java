@@ -4,15 +4,15 @@ import chess.ChessGame;
 import model.GameData;
 import model.NewGameResult;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 
 public class MemoryGameDataAccess implements GameDAO{
     private int nextId = 1;
     HashMap<Integer, GameData> games = new HashMap<>();
 
     @Override
-    public NewGameResult createGame(String gameName) throws DataAccessException {
+    public NewGameResult createGame(String gameName) {
         GameData game = new GameData(nextId++, null, null, gameName, new ChessGame());
         games.put(game.gameID(), game);
         return new NewGameResult(game.gameID());
@@ -28,8 +28,8 @@ public class MemoryGameDataAccess implements GameDAO{
     }
 
     @Override
-    public HashSet<GameData> listGames() throws DataAccessException {
-        return null;
+    public Collection<GameData> listGames() {
+        return games.values();
     }
 
     @Override
