@@ -13,15 +13,24 @@ public class Server {
     private final Javalin httpHandler;
     private final UserService userService;
     private final GameService gameService;
-    private final DatabaseManager dbManager;
 
     public Server() {
-        UserDAO userDataAccess = new MemoryUserDataAccess();
-        AuthDAO authDataAccess = new MemoryAuthDataAccess();
-        GameDAO gameDataAccess = new MemoryGameDataAccess();
+        boolean sql = true;
+
+        if (sql) {
+            try {
+                SQLInitializer.configureDatabase();
+            }
+            catch (ResponseException | DataAccessException ex) {
+                throw new RuntimeException("Database could not be configured", ex);
+            }
+        }
+
+        UserDAO userDataAccess = (sql) ? new SQLUserDataAccess() : new MemoryUserDataAccess();
+        AuthDAO authDataAccess = (sql) ? new SQLAuthDataAccess() : new MemoryAuthDataAccess();
+        GameDAO gameDataAccess = (sql) ? new SQLGameDataAccess() : new MemoryGameDataAccess();
         userService = new UserService(userDataAccess, authDataAccess);
         gameService = new GameService(gameDataAccess, authDataAccess);
-        dbManager = new DatabaseManager();
 
 
         httpHandler = Javalin.create(config -> config.staticFiles.add("web"))
