@@ -40,13 +40,15 @@ public class SQLAuthDataAccess implements AuthDAO{
     }
 
     @Override
-    public void deleteAuth(String username) throws DataAccessException {
-
+    public void deleteAuth(String authToken) throws DataAccessException {
+        var statement = "DELETE FROM auth WHERE authToken = ?";
+        SQLInitializer.executeUpdate(statement, authToken);
     }
 
     @Override
     public void clearAuthData() throws DataAccessException {
-
+        var statement = "TRUNCATE auth";
+        SQLInitializer.executeUpdate(statement);
     }
 
     private AuthData readAuth(ResultSet rs) throws SQLException {
