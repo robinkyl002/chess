@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import exception.ResponseException;
 
 import java.sql.Connection;
@@ -15,11 +16,11 @@ public class SQLInitializer {
     private static final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS  game (
-              `id` int NOT NULL AUTO_INCREMENT,
               `whiteUsername` varchar(256),
               `blackUsername` varchar(256),
               `gameName` varchar(256) NOT NULL,
               `chessGame` TEXT DEFAULT NULL,
+              `id` int NOT NULL AUTO_INCREMENT,
               PRIMARY KEY (`id`),
               INDEX(gameName),
               INDEX(blackUsername),
@@ -67,6 +68,8 @@ public class SQLInitializer {
                 for (int i = 0; i < params.length; i++) {
                     Object param = params[i];
                     if (param instanceof String p) ps.setString(i + 1, p);
+                    else if (param instanceof Integer p) ps.setInt(i + 1, p);
+                    else if (param instanceof ChessGame p) ps.setString(i + 1, p.toString());
                     else if (param == null) ps.setNull(i + 1, NULL);
                 }
                 ps.executeUpdate();
