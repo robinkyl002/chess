@@ -34,7 +34,7 @@ public class SQLAuthDataAccess implements AuthDAO{
                 }
             }
         } catch (Exception ex) {
-            throw new DataAccessException("Could not find user in database", ex);
+            throw new DataAccessException("Could not find auth in database", ex);
         }
         return null;
     }
