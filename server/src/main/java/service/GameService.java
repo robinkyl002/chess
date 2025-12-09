@@ -19,10 +19,14 @@ public class GameService {
     }
 
     public NewGameResult newGame(String gameName) throws ResponseException {
-        if (gameName == null || gameName.isEmpty()) {
-            throw new ResponseException(ResponseException.Code.BadRequestError, "Error: bad request");
+        try {
+            if (gameName == null || gameName.isEmpty()) {
+                throw new ResponseException(ResponseException.Code.BadRequestError, "Error: bad request");
+            }
+            return gameDataAccess.createGame(gameName);
+        } catch (DataAccessException ex) {
+            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
         }
-        return gameDataAccess.createGame(gameName);
     }
 
     public void joinGame(JoinGameRequest joinRequest, String authToken) throws DataAccessException, ResponseException {
@@ -31,8 +35,10 @@ public class GameService {
         }
         GameData game = gameDataAccess.getGame(joinRequest.gameID());
 
-        if ((joinRequest.playerColor() == ChessGame.TeamColor.BLACK && game.blackUsername() != null) ||
-                (joinRequest.playerColor() == ChessGame.TeamColor.WHITE && game.whiteUsername() != null)) {
+        if ((joinRequest.playerColor() == ChessGame.TeamColor.BLACK && game.blackUsername() != null
+                && !game.blackUsername().isEmpty()) ||
+                (joinRequest.playerColor() == ChessGame.TeamColor.WHITE && game.whiteUsername() != null
+                        && !game.blackUsername().isEmpty())) {
             throw new ResponseException(ResponseException.Code.AlreadyTakenError, "Error: already taken");
         }
         AuthData auth = authDataAccess.getAuth(authToken);
