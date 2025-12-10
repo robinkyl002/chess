@@ -58,7 +58,7 @@ public class SQLInitializer {
                 }
             }
         } catch (SQLException ex) {
-            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to configure database: %s", ex.getMessage()));
+            throw new ResponseException(ResponseException.Code.ServerError, String.format("Error: Unable to configure database: %s", ex.getMessage()));
         }
     }
 
@@ -82,7 +82,7 @@ public class SQLInitializer {
                 return 0;
             }
         } catch (SQLException e) {
-            throw new DataAccessException("unable to update database", e);
+            throw new DataAccessException("Error: Unable to update database", e);
         }
     }
 
