@@ -10,11 +10,14 @@ public class MemoryAuthDataAccess implements AuthDAO {
 
     public AuthData createAuth(String username) throws DataAccessException {
         try {
+            if (username == null) {
+                throw new DataAccessException("Error: username cannot be null");
+            }
             AuthData newAuth = new AuthData(generateToken(), username);
             authTokens.put(newAuth.authToken(), newAuth);
             return newAuth;
         } catch (Exception e) {
-            throw new DataAccessException("Error: " + e.getMessage(), e);
+            throw new DataAccessException(e.getMessage(), e);
         }
     }
 
