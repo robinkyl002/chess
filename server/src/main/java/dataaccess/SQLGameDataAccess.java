@@ -46,7 +46,8 @@ public class SQLGameDataAccess implements GameDAO{
     @Override
     public Collection<GameData> listGames() {
         var games = new ArrayList<GameData>();
-        try (var preparedStatement = DatabaseManager.getConnection().prepareStatement("SELECT id, whiteUsername, blackUsername, gameName, chessGame FROM game")) {
+        try (var preparedStatement = DatabaseManager.getConnection().prepareStatement("SELECT id, whiteUsername," +
+                " blackUsername, gameName, chessGame FROM game")) {
             try (var rs = preparedStatement.executeQuery()) {
                 while (rs.next()) {
                     var currGame = readGame(rs);
