@@ -1,7 +1,5 @@
 package dataaccess;
 
-import com.google.gson.Gson;
-import exception.ResponseException;
 import model.UserData;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -10,15 +8,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
-import static java.sql.Types.NULL;
-
 public class SQLUserDataAccess implements UserDAO{
     @Override
     public void createUser(UserData data) throws DataAccessException {
-        var statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
-        String hashedPassword = BCrypt.hashpw(data.password(), BCrypt.gensalt());
-        SQLInitializer.executeUpdate(statement, data.username(), hashedPassword, data.email());
+        try {
+            var statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
+            String hashedPassword = BCrypt.hashpw(data.password(), BCrypt.gensalt());
+            SQLInitializer.executeUpdate(statement, data.username(), hashedPassword, data.email());
+        } catch (Exception ex) {
+            throw new DataAccessException("Error: could not create new user", ex);
+        }
     }
 
     @Override
@@ -34,7 +33,7 @@ public class SQLUserDataAccess implements UserDAO{
                 }
             }
         } catch (Exception ex) {
-            throw new DataAccessException("Could not find user in database", ex);
+            throw new DataAccessException("Error: Could not find user in database", ex);
         }
         return null;
     }
