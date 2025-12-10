@@ -21,7 +21,7 @@ public class SQLGameDataAccess implements GameDAO{
             return new NewGameResult(id);
 
         } catch (Exception ex) {
-            throw new DataAccessException("Could not create new game", ex);
+            throw new DataAccessException("Error: Could not create new game", ex);
         }
     }
 
@@ -38,7 +38,7 @@ public class SQLGameDataAccess implements GameDAO{
                 }
             }
         } catch (Exception ex) {
-            throw new DataAccessException("Could not find game in database", ex);
+            throw new DataAccessException("Error: Could not find game in database", ex);
         }
         return null;
     }
@@ -55,7 +55,7 @@ public class SQLGameDataAccess implements GameDAO{
             }
             return games;
         } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error: Could not list games", e);
         }
     }
 
@@ -68,7 +68,7 @@ public class SQLGameDataAccess implements GameDAO{
 
             ps.executeUpdate();
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), e);
+            throw new DataAccessException("Error: " + e.getMessage(), e);
         }
     }
 
