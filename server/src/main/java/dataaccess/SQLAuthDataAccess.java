@@ -34,15 +34,19 @@ public class SQLAuthDataAccess implements AuthDAO{
                 }
             }
         } catch (Exception ex) {
-            throw new DataAccessException("Could not find auth in database", ex);
+            throw new DataAccessException("Error: Could not find auth in database", ex);
         }
         return null;
     }
 
     @Override
     public void deleteAuth(String authToken) throws DataAccessException {
-        var statement = "DELETE FROM auth WHERE authToken = ?";
-        SQLInitializer.executeUpdate(statement, authToken);
+        try {
+            var statement = "DELETE FROM auth WHERE authToken = ?";
+            SQLInitializer.executeUpdate(statement, authToken);
+        } catch (Exception ex) {
+            throw new DataAccessException("Error: could not logout user", ex);
+        }
     }
 
     @Override
