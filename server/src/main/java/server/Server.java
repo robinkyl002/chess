@@ -104,46 +104,55 @@ public class Server {
         }
     }
 
-    private void createGame(Context ctx) throws DataAccessException, ResponseException {
-        String authToken = ctx.header("Authorization");
+    private void createGame(Context ctx) throws ResponseException {
+        try {
+            String authToken = ctx.header("Authorization");
 
-        if (userService.validAuth(authToken)) {
-            NewGameRequest gameRequest = new Gson().fromJson(ctx.body(), NewGameRequest.class);
+            if (userService.validAuth(authToken)) {
+                NewGameRequest gameRequest = new Gson().fromJson(ctx.body(), NewGameRequest.class);
 
-            NewGameResult newGame = gameService.newGame(gameRequest.gameName());
-            ctx.status(200).result(new Gson().toJson(newGame));
-        }
-        else {
-            throw new ResponseException(ResponseException.Code.UnauthorizedError, "Error: Unauthorized");
+                NewGameResult newGame = gameService.newGame(gameRequest.gameName());
+                ctx.status(200).result(new Gson().toJson(newGame));
+            } else {
+                throw new ResponseException(ResponseException.Code.UnauthorizedError, "Error: Unauthorized");
+            }
+        } catch (DataAccessException ex) {
+            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
         }
     }
 
-    private void listGames(Context ctx) throws DataAccessException, ResponseException {
-        String authToken = ctx.header("Authorization");
+    private void listGames(Context ctx) throws ResponseException {
+        try {
+            String authToken = ctx.header("Authorization");
 
-        if (userService.validAuth(authToken)) {
+            if (userService.validAuth(authToken)) {
 
-            ListGamesResult games = gameService.listGames();
+                ListGamesResult games = gameService.listGames();
 
-            ctx.status(200).result(new Gson().toJson(games));
-        }
-        else {
-            throw new ResponseException(ResponseException.Code.UnauthorizedError, "Error: Unauthorized");
+                ctx.status(200).result(new Gson().toJson(games));
+            } else {
+                throw new ResponseException(ResponseException.Code.UnauthorizedError, "Error: Unauthorized");
+            }
+        } catch (DataAccessException ex) {
+            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
         }
 
     }
 
-    private void joinGame(Context ctx) throws DataAccessException, ResponseException {
-        String authToken = ctx.header("Authorization");
+    private void joinGame(Context ctx) throws ResponseException {
+        try {
+            String authToken = ctx.header("Authorization");
 
-        if (userService.validAuth(authToken)) {
-            JoinGameRequest joinReq = new Gson().fromJson(ctx.body(), JoinGameRequest.class);
-            gameService.joinGame(joinReq, authToken);
+            if (userService.validAuth(authToken)) {
+                JoinGameRequest joinReq = new Gson().fromJson(ctx.body(), JoinGameRequest.class);
+                gameService.joinGame(joinReq, authToken);
 
-            ctx.status(200).result("");
-        }
-        else {
-            throw new ResponseException(ResponseException.Code.UnauthorizedError, "Error: Unauthorized");
+                ctx.status(200).result("");
+            } else {
+                throw new ResponseException(ResponseException.Code.UnauthorizedError, "Error: Unauthorized");
+            }
+        } catch (DataAccessException ex) {
+            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
         }
     }
 
