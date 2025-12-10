@@ -22,7 +22,7 @@ public class Server {
                 SQLInitializer.configureDatabase();
             }
             catch (ResponseException | DataAccessException ex) {
-                throw new RuntimeException("Database could not be configured", ex);
+                throw new RuntimeException("Error: Database could not be configured", ex);
             }
         }
 
@@ -56,7 +56,7 @@ public class Server {
         httpHandler.stop();
     }
 
-    private void registerUser (Context ctx) throws ResponseException, DataAccessException {
+    private void registerUser (Context ctx) throws ResponseException {
         UserData user = new Gson().fromJson(ctx.body(), UserData.class);
 
         if (user.username() == null || user.password() == null || user.email() == null) {
@@ -89,15 +89,18 @@ public class Server {
         ctx.status(200).result(new Gson().toJson(auth));
     }
 
-    private void logoutUser(Context ctx) throws DataAccessException, ResponseException{
-        String authToken = ctx.header("Authorization");
+    private void logoutUser(Context ctx) throws ResponseException{
+        try {
+            String authToken = ctx.header("Authorization");
 
-        if (userService.validAuth(authToken)) {
-            userService.logout(authToken);
-            ctx.status(200).result("");
-        }
-        else {
-            throw new ResponseException(ResponseException.Code.UnauthorizedError, "Error: Unauthorized");
+            if (userService.validAuth(authToken)) {
+                userService.logout(authToken);
+                ctx.status(200).result("");
+            } else {
+                throw new ResponseException(ResponseException.Code.UnauthorizedError, "Error: Unauthorized");
+            }
+        } catch (DataAccessException ex) {
+            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
         }
     }
 

@@ -17,14 +17,18 @@ public class UserService {
         this.authDataAccess = authDataAccess;
     }
 
-    public AuthData createUser(String username, String password, String email) throws DataAccessException, ResponseException {
-        UserData existingUser = userDataAccess.getUser(username);
-        if (existingUser != null) {
-            throw new ResponseException(ResponseException.Code.AlreadyTakenError, "Error: username already taken");
-        }
-        userDataAccess.createUser(new UserData(username, password, email));
+    public AuthData createUser(String username, String password, String email) throws ResponseException {
+        try {
+            UserData existingUser = userDataAccess.getUser(username);
+            if (existingUser != null) {
+                throw new ResponseException(ResponseException.Code.AlreadyTakenError, "Error: username already taken");
+            }
+            userDataAccess.createUser(new UserData(username, password, email));
 
-        return authDataAccess.createAuth(username);
+            return authDataAccess.createAuth(username);
+        } catch (DataAccessException ex) {
+            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
+        }
     }
 
     public AuthData login(UserData loginRequest) throws DataAccessException, ResponseException {
@@ -46,7 +50,7 @@ public class UserService {
         }
     }
 
-    public void logout(String authToken) throws DataAccessException, ResponseException {
+    public void logout(String authToken) throws ResponseException {
         try {
             AuthData auth = authDataAccess.getAuth(authToken);
 
@@ -56,12 +60,8 @@ public class UserService {
 
             authDataAccess.deleteAuth(authToken);
         }
-        catch (Exception ex) {
-            if (ex instanceof ResponseException) {
-                throw ex;
-            } else {
+        catch (DataAccessException ex) {
                 throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
-            }
         }
     }
 
