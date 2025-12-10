@@ -12,7 +12,10 @@ public class MemoryGameDataAccess implements GameDAO{
     HashMap<Integer, GameData> games = new HashMap<>();
 
     @Override
-    public NewGameResult createGame(String gameName) {
+    public NewGameResult createGame(String gameName) throws DataAccessException {
+        if (gameName == null) {
+            throw new DataAccessException("gameName cannot be null");
+        }
         GameData game = new GameData(nextId++, null, null, gameName, new ChessGame());
         games.put(game.gameID(), game);
         return new NewGameResult(game.gameID());
@@ -20,11 +23,7 @@ public class MemoryGameDataAccess implements GameDAO{
 
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
-        GameData game = games.get(gameID);
-        if (game == null) {
-            throw new DataAccessException("Game not found");
-        }
-        return game;
+        return  games.get(gameID);
     }
 
     @Override
