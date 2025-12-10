@@ -1,8 +1,6 @@
 package service;
 
-import dataaccess.DataAccessException;
-import dataaccess.MemoryAuthDataAccess;
-import dataaccess.MemoryUserDataAccess;
+import dataaccess.*;
 import exception.ResponseException;
 import model.*;
 import org.junit.jupiter.api.*;
@@ -11,7 +9,10 @@ import passoff.model.TestUser;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserServiceTest {
-    private final UserService userService = new UserService(new MemoryUserDataAccess(), new MemoryAuthDataAccess());
+    private final boolean sql = true;
+    private final UserDAO userDAO = (sql) ? new SQLUserDataAccess() : new MemoryUserDataAccess();
+    private final AuthDAO authDAO = (sql) ? new SQLAuthDataAccess() : new MemoryAuthDataAccess();
+    private final UserService userService = new UserService(userDAO, authDAO);
     private static TestUser existingUser;
 
     @BeforeEach
@@ -24,7 +25,7 @@ class UserServiceTest {
 
     @Test
     @DisplayName("Register Success")
-    void createUserSuccessful() throws ResponseException, DataAccessException {
+    void createUserSuccessful() throws ResponseException {
         AuthData auth = userService.createUser(existingUser.getUsername(), existingUser.getPassword(), existingUser.getEmail());
 
         assertNotNull(auth);
@@ -35,7 +36,7 @@ class UserServiceTest {
 
     @Test
     @DisplayName("Re-Register User")
-    void userAlreadyExists () throws ResponseException, DataAccessException {
+    void userAlreadyExists () throws ResponseException {
         userService.createUser(existingUser.getUsername(), existingUser.getPassword(), existingUser.getEmail());
 
         assertThrows(ResponseException.class, () -> {
@@ -61,7 +62,7 @@ class UserServiceTest {
 
     @Test
     @DisplayName("Wrong Password")
-    void loginWrongPassword() throws ResponseException, DataAccessException {
+    void loginWrongPassword() throws ResponseException {
         AuthData registerAuth = userService.createUser(existingUser.getUsername(), existingUser.getPassword(), existingUser.getEmail());
 
         userService.logout(registerAuth.authToken());
@@ -75,7 +76,7 @@ class UserServiceTest {
 
     @Test
     @DisplayName("Successful Logout")
-    void logout() throws ResponseException, DataAccessException {
+    void logout() throws ResponseException {
         AuthData auth = userService.createUser(existingUser.getUsername(), existingUser.getPassword(), existingUser.getEmail());
 
         assertDoesNotThrow(() -> userService.logout(auth.authToken()));
@@ -83,7 +84,7 @@ class UserServiceTest {
 
     @Test
     @DisplayName("Unauthorized logout")
-    void logoutErrorNoAuth() throws ResponseException, DataAccessException {
+    void logoutErrorNoAuth() throws ResponseException {
         AuthData auth = userService.createUser(existingUser.getUsername(), existingUser.getPassword(), existingUser.getEmail());
 
         userService.logout(auth.authToken());
