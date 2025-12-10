@@ -61,6 +61,10 @@ public class SQLGameDataAccess implements GameDAO{
 
     @Override
     public void updateGame(GameData updatedGame) throws DataAccessException {
+        GameData oldGame = getGame(updatedGame.gameID());
+        if (oldGame == null) {
+            throw new DataAccessException("Game does not exist");
+        }
         try (var ps = DatabaseManager.getConnection().prepareStatement("UPDATE game SET whiteUsername=?, blackUsername=? WHERE id=?")) {
             ps.setString(1, updatedGame.whiteUsername());
             ps.setString(2, updatedGame.blackUsername());
