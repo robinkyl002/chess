@@ -1,10 +1,6 @@
-package dataAccess;
+package dataaccess;
 
 import chess.ChessGame;
-import dataaccess.GameDAO;
-import dataaccess.MemoryGameDataAccess;
-import dataaccess.SQLGameDataAccess;
-import dataaccess.DataAccessException;
 import model.GameData;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
