@@ -7,9 +7,15 @@ package chess;
  * signature of the existing methods.
  */
 public class ChessMove {
+    private ChessPosition start;
+    private ChessPosition end;
+    private ChessPiece.PieceType promotionPiece;
 
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
                      ChessPiece.PieceType promotionPiece) {
+        start = startPosition;
+        end = endPosition;
+        this.promotionPiece = promotionPiece;
     }
 
     /**
