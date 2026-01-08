@@ -6,8 +6,8 @@ public abstract class GeneralMovesCalculator implements MoveRules{
     protected void calculateMoves(ChessPosition pos, int rowIncrement, int colIncrement,
                                   Collection<ChessMove> moves, ChessBoard board,
                                   boolean repeatMove) {
-        if (pos.getRow() + rowIncrement > 8 || pos.getRow() + rowIncrement < 0 ||
-                pos.getColumn() + colIncrement > 8 || pos.getColumn() + colIncrement < 0) {
+        if (pos.getRow() + rowIncrement > 8 || pos.getRow() + rowIncrement < 1 ||
+                pos.getColumn() + colIncrement > 8 || pos.getColumn() + colIncrement < 1) {
             return;
         }
 
@@ -16,7 +16,7 @@ public abstract class GeneralMovesCalculator implements MoveRules{
         if (board.getPiece(newPosition) == null) {
             moves.add(new ChessMove(pos, newPosition, null));
             if (repeatMove) {
-                calculateMoves(newPosition, rowIncrement + Integer.signum(rowIncrement),
+                calculateMoves(pos, rowIncrement + Integer.signum(rowIncrement),
                         colIncrement + Integer.signum(colIncrement), moves, board, repeatMove);
             }
         }
