@@ -1,5 +1,10 @@
 package chess;
 
+import java.util.Arrays;
+
+import static chess.ChessGame.TeamColor.*;
+import static chess.ChessPiece.PieceType.*;
+
 /**
  * A chessboard that can hold and rearrange chess pieces.
  * <p>
@@ -8,6 +13,7 @@ package chess;
  */
 public class ChessBoard {
 
+    private final ChessPiece [][] board = new ChessPiece[8][8];
     public ChessBoard() {
         
     }
@@ -38,6 +44,33 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
+       ChessPiece.PieceType[] backRow = {ROOK, KNIGHT, BISHOP, KING, QUEEN, BISHOP, KNIGHT, ROOK};
+
+       for (ChessPiece[] currPieces : board) {
+           Arrays.fill(currPieces, null);
+       }
+
+       for (int i = 0; i < 8; i++) {
+           board[0][i] = new ChessPiece(WHITE, backRow[i]);
+           board[7][i] = new ChessPiece(BLACK, backRow[i]);
+       }
+
+       Arrays.fill(board[1], new ChessPiece(WHITE, PAWN));
+       Arrays.fill(board[6], new ChessPiece(BLACK, PAWN));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        ChessBoard that = (ChessBoard) o;
+        return Arrays.deepEquals(board, that.board);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(board);
     }
 }
