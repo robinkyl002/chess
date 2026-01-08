@@ -52,7 +52,13 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        switch (board.getPiece(myPosition).getPieceType()) {
+            case ROOK:
+                var calculator = new RookMoves();
+                return calculator.moves(board, myPosition);
+            default:
+                return null;
+        }
     }
 
     @Override
