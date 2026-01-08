@@ -48,13 +48,16 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-       ChessPiece.PieceType[] backRow = {ROOK, KNIGHT, BISHOP, KING, QUEEN, BISHOP, KNIGHT, ROOK};
+       ChessPiece.PieceType[] backRow = {ROOK, KNIGHT, BISHOP, QUEEN, KING, BISHOP, KNIGHT, ROOK};
 
        for (ChessPiece[] currPieces : board) {
            Arrays.fill(currPieces, null);
        }
 
-       for (int i = 0; i < 8; i++) {
+       for (int i = 0; i < backRow.length; i++) {
+//           addPiece(new ChessPosition(1, i+1), new ChessPiece(WHITE, backRow[i]));
+//           addPiece(new ChessPosition(8, i+1), new ChessPiece(BLACK, backRow[i]));
+
            board[0][i] = new ChessPiece(WHITE, backRow[i]);
            board[7][i] = new ChessPiece(BLACK, backRow[i]);
        }
