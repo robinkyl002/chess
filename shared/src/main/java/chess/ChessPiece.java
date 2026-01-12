@@ -69,7 +69,11 @@ public class ChessPiece {
                 var calculator = new QueenMoves();
                 yield calculator.moves(board, myPosition);
             }
-            case KNIGHT, PAWN -> {
+            case KNIGHT -> {
+                var calculator = new KnightMoves();
+                yield calculator.moves(board, myPosition);
+            }
+            case PAWN -> {
                 yield null;
             }
         };
