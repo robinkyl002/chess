@@ -52,13 +52,27 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        switch (board.getPiece(myPosition).getPieceType()) {
-            case ROOK:
+        return switch (type) {
+            case ROOK -> {
                 var calculator = new RookMoves();
-                return calculator.moves(board, myPosition);
-            default:
-                return null;
-        }
+                yield calculator.moves(board, myPosition);
+            }
+            case BISHOP -> {
+                var calculator = new BishopMoves();
+                yield calculator.moves(board, myPosition);
+            }
+            case KING -> {
+                var calculator = new KingMoves();
+                yield calculator.moves(board, myPosition);
+            }
+            case QUEEN -> {
+                var calculator = new QueenMoves();
+                yield calculator.moves(board, myPosition);
+            }
+            case KNIGHT, PAWN -> {
+                yield null;
+            }
+        };
     }
 
     @Override
