@@ -74,7 +74,8 @@ public class ChessPiece {
                 yield calculator.moves(board, myPosition);
             }
             case PAWN -> {
-                yield null;
+                var calculator = new PawnMovesCalculator();
+                yield calculator.moves(board, myPosition);
             }
         };
     }
