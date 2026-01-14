@@ -46,27 +46,29 @@ public class PawnMovesCalculator implements MoveRules{
         }
     }
 
-    private boolean onBoard(int row, int col) {
-        return row <= 8 && row >= 1 && col <= 8 && col >= 1;
+    private boolean offBoard(int row, int col) {
+        return row > 8 || row < 1 || col > 8 || col < 1;
     }
 
     private void diagonalMoves(Collection<ChessMove> moves, ChessBoard board,
                                ChessPosition pos, ChessPiece pawn, int promo, int direction) {
 
-        if (!onBoard(pos.getRow() + direction, pos.getColumn() + 1)
-                || !onBoard(pos.getRow() + direction, pos.getColumn() -1)) { return; }
+        if (!offBoard(pos.getRow() + direction, pos.getColumn() + 1)) {
+            var firstMove = new ChessPosition(pos.getRow() + direction, pos.getColumn() + 1);
+            capture(board, pawn, moves, pos, firstMove, promo);
+        }
 
-        var firstMove = new ChessPosition(pos.getRow() + direction, pos.getColumn() + 1);
-        var secondMove = new ChessPosition(pos.getRow() + direction, pos.getColumn() - 1);
+        if (!offBoard(pos.getRow() + direction, pos.getColumn() -1)) {
+            var secondMove = new ChessPosition(pos.getRow() + direction, pos.getColumn() - 1);
+            capture(board, pawn, moves, pos, secondMove, promo);
+        }
 
-        capture(board, pawn, moves, pos, firstMove, promo);
-        capture(board, pawn, moves, pos, secondMove, promo);
     }
 
     private void forwardMoves(Collection<ChessMove> moves, ChessBoard board,
                               ChessPosition pos, int start, int promo, int direction) {
         var singleSpacePosition = new ChessPosition(pos.getRow() + direction, pos.getColumn());
-        if (!onBoard(singleSpacePosition.getRow(), singleSpacePosition.getColumn())) {
+        if (offBoard(singleSpacePosition.getRow(), singleSpacePosition.getColumn())) {
             return;
         }
 
