@@ -55,9 +55,6 @@ public class ChessBoard {
        }
 
        for (int i = 0; i < backRow.length; i++) {
-//           addPiece(new ChessPosition(1, i+1), new ChessPiece(WHITE, backRow[i]));
-//           addPiece(new ChessPosition(8, i+1), new ChessPiece(BLACK, backRow[i]));
-
            board[0][i] = new ChessPiece(WHITE, backRow[i]);
            board[7][i] = new ChessPiece(BLACK, backRow[i]);
        }
