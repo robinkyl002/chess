@@ -12,6 +12,9 @@
   - cp indicates class path, where the class is so it can be used
 - `static` keyword says there is only one copy of the object
 
-### Other
+## Classes and Objects
 
+- When comparing enum values, you can use `==` instead of `o.equals(x)`
+- `getClass()` comparison option for equals method restricts comparing things to only allow objects of the same class to be equal 
+  - a subclass object cannot be considered equal to an object of the parent class
 - 
