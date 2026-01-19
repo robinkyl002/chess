@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import static chess.ChessGame.TeamColor.*;
 import static chess.ChessPiece.PieceType.*;
@@ -14,8 +15,11 @@ import static chess.ChessPiece.PieceType.*;
 public class ChessBoard {
 
     private final ChessPiece [][] board = new ChessPiece[8][8];
+    private ChessPosition whiteKingPosition;
+    private ChessPosition blackKingPosition;
     public ChessBoard() {
-        
+        whiteKingPosition = null;
+        blackKingPosition = null;
     }
 
     /**
@@ -29,6 +33,15 @@ public class ChessBoard {
 
         if (piece == null) {
             return;
+        }
+
+        if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+            if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                whiteKingPosition = position;
+            }
+            else {
+                blackKingPosition = position;
+            }
         }
     }
 
@@ -70,11 +83,15 @@ public class ChessBoard {
         }
 
         ChessBoard that = (ChessBoard) o;
-        return Arrays.deepEquals(board, that.board);
+        return Arrays.deepEquals(board, that.board) && Objects.equals(whiteKingPosition,
+                that.whiteKingPosition) && Objects.equals(blackKingPosition, that.blackKingPosition);
     }
 
     @Override
     public int hashCode() {
-        return Arrays.deepHashCode(board);
+        int result = Arrays.deepHashCode(board);
+        result = 31 * result + Objects.hashCode(whiteKingPosition);
+        result = 31 * result + Objects.hashCode(blackKingPosition);
+        return result;
     }
 }
