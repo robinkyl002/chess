@@ -56,6 +56,19 @@ public class ChessBoard {
         return board[position.getRow()-1][position.getColumn()-1];
     }
 
+    void setKingPosition(ChessGame.TeamColor color, ChessPosition pos) {
+        if (color == ChessGame.TeamColor.WHITE){
+            whiteKingPosition = pos;
+        }
+        else {
+            blackKingPosition = pos;
+        }
+    }
+
+    ChessPosition getKingPosition(ChessGame.TeamColor color) {
+        return (color == ChessGame.TeamColor.WHITE) ? whiteKingPosition : blackKingPosition;
+    }
+
     public void movePiece(ChessPosition start, ChessPosition end, ChessPiece.PieceType promotionPiece) {
         ChessPiece currPiece = board[start.getRow()-1][start.getColumn()-1];
 
