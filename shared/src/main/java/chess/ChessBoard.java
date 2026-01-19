@@ -56,6 +56,19 @@ public class ChessBoard {
         return board[position.getRow()-1][position.getColumn()-1];
     }
 
+    public void movePiece(ChessPosition start, ChessPosition end, ChessPiece.PieceType promotionPiece) {
+        ChessPiece currPiece = board[start.getRow()-1][start.getColumn()-1];
+
+        if (currPiece.getPieceType() == PAWN && end.getRow() == 1 || end.getRow() == 8) {
+            board[end.getRow()-1][end.getColumn()-1] = new ChessPiece(currPiece.getTeamColor(), promotionPiece);
+            board[start.getRow()-1][start.getColumn()-1] = null;
+        }
+        else {
+            board[end.getRow()-1][end.getColumn()-1] = currPiece;
+            board[start.getRow()-1][start.getColumn()-1] = null;
+        }
+    }
+
     /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
