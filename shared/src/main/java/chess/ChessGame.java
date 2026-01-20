@@ -59,9 +59,40 @@ public class ChessGame {
 
         Collection<ChessMove> moves = piece.pieceMoves(board, startPosition);
 
-        moves.removeIf(move -> move.getStartPosition().getRow() == 2);
+        moves.removeIf(move -> !testMove(move));
 
         return moves;
+    }
+
+    private boolean testMove(ChessMove move) {
+        ChessPiece movingPiece = board.getPiece(move.getStartPosition());
+        ChessPiece capturedPiece = board.getPiece(move.getEndPosition());
+
+        performTestMove(move);
+
+        boolean validMove = !isInCheck(movingPiece.getTeamColor());
+
+        revertTestMove(movingPiece, capturedPiece, move.getStartPosition(), move.getEndPosition());
+
+        return validMove;
+    }
+
+    private void revertTestMove(ChessPiece moving, ChessPiece captured, ChessPosition start, ChessPosition end) {
+        board.addPiece(start, moving);
+        board.addPiece(end, captured);
+    }
+
+    private void performTestMove(ChessMove move) {
+        ChessPiece mover = board.getPiece(move.getStartPosition());
+
+        if (move.getPromotionPiece() == null) {
+            board.addPiece(move.getEndPosition(), mover);
+        }
+        else {
+            board.addPiece(move.getEndPosition(), new ChessPiece(mover.getTeamColor(), move.getPromotionPiece()));
+        }
+        board.addPiece(move.getStartPosition(), null);
+
     }
 
     /**
