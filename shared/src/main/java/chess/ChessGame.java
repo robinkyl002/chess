@@ -1,8 +1,8 @@
 package chess;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
+import java.util.Objects;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -102,7 +102,31 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        ChessPosition initPosition = move.getStartPosition();
+        ChessPosition endPosition = move.getEndPosition();
+
+        Collection<ChessMove> validMoves = validMoves(initPosition);
+        if (validMoves == null) {
+            throw new InvalidMoveException();
+        } else {
+            boolean validMove = validMoves.contains(move);
+            if (!validMove) {
+                throw new InvalidMoveException();
+            }
+        }
+
+        ChessPiece currPiece = board.getPiece(initPosition);
+        if (currPiece.getTeamColor() != currTeam) {
+            throw new InvalidMoveException();
+        }
+
+        board.movePiece(initPosition, endPosition, move.getPromotionPiece());
+
+        if (currPiece.getPieceType() == ChessPiece.PieceType.KING) {
+            board.setKingPosition(currPiece.getTeamColor(), endPosition);
+        }
+
+        currTeam = (currTeam == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
     }
 
     /**
@@ -195,5 +219,22 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return board;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        ChessGame chessGame = (ChessGame) o;
+        return Objects.equals(board, chessGame.board) && currTeam == chessGame.currTeam;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hashCode(board);
+        result = 31 * result + Objects.hashCode(currTeam);
+        return result;
     }
 }
