@@ -35,4 +35,11 @@ public class MemoryGameDAO implements GameDAO {
                 new GameData(gameID, currGame.whiteUsername(), username, currGame.gameName(), currGame.game());
         games.put(gameID, newGame);
     }
+
+    @Override
+    public void clearGameData() {
+        if(!games.isEmpty()) {
+            games.clear();
+        }
+    }
 }
