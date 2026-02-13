@@ -1,21 +1,25 @@
 package dataaccess;
 
+import chess.ChessGame;
 import model.GameData;
 
 import java.util.HashMap;
 
 public class MemoryGameDAO implements GameDAO {
     HashMap<Integer, GameData> games = new HashMap<>();
-    // private int nextId = 1;
+    private int nextId = 1;
 
     @Override
-    public void createGame(GameData game) {
-
+    public int createGame(String gameName) {
+        var game = new GameData(nextId++, null, null,
+                gameName, new ChessGame());
+        games.put(game.gameID(), game);
+        return game.gameID();
     }
 
     @Override
-    public void getGame(int gameID) {
-        games.get(gameID);
+    public GameData getGame(int gameID) {
+        return games.get(gameID);
     }
 
     @Override
@@ -24,7 +28,11 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public void updateGame() {
-
+    public void updateGame(int gameID, String username, ChessGame.TeamColor color) {
+        var currGame = getGame(gameID);
+        var newGame = (color == ChessGame.TeamColor.WHITE) ?
+                new GameData(gameID, username, currGame.blackUsername(), currGame.gameName(), currGame.game()) :
+                new GameData(gameID, currGame.whiteUsername(), username, currGame.gameName(), currGame.game());
+        games.put(gameID, newGame);
     }
 }
