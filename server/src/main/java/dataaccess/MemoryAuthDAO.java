@@ -6,11 +6,13 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class MemoryAuthDAO implements AuthDAO{
-    private HashMap<String, AuthData> authTokens = new HashMap<>();
+    private final HashMap<String, AuthData> authTokens = new HashMap<>();
 
     @Override
-    public AuthData createAuth(AuthData authData) {
-        authTokens.put(authData.authToken(), authData);
+    public AuthData createAuth(String username) {
+        String newToken = generateToken();
+        AuthData authData = new AuthData(newToken, username);
+        authTokens.put(newToken, authData);
         return authData;
     }
 
