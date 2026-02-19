@@ -22,7 +22,7 @@ public class ResponseException extends Exception {
     }
 
     public String toJson() {
-        return new Gson().toJson(Map.of("message", getMessage(), "code", code));
+        return new Gson().toJson(Map.of("message", getMessage()));
     }
 
     public static ResponseException fromJson(String json) {
@@ -40,6 +40,8 @@ public class ResponseException extends Exception {
         return switch (httpStatusCode) {
             case 500 -> Code.ServerError;
             case 400 -> Code.BadRequestError;
+            case 401 -> Code.UnauthorizedError;
+            case 403 -> Code.AlreadyTakenError;
             default -> throw new IllegalArgumentException("Unknown HTTP status code: " + httpStatusCode);
         };
     }
@@ -48,8 +50,8 @@ public class ResponseException extends Exception {
         return switch (code) {
             case ServerError -> 500;
             case BadRequestError -> 400;
-            case AlreadyTakenError -> 401;
-            case UnauthorizedError -> 403;
+            case UnauthorizedError -> 401;
+            case AlreadyTakenError -> 403;
         };
     }
 }
