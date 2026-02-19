@@ -9,7 +9,7 @@ public class MemoryAuthDAO implements AuthDAO{
     private final HashMap<String, AuthData> authTokens = new HashMap<>();
 
     @Override
-    public AuthData createAuth(String username) {
+    public AuthData createAuth(String username) throws DataAccessException {
         String newToken = generateToken();
         AuthData authData = new AuthData(newToken, username);
         authTokens.put(newToken, authData);
@@ -17,17 +17,17 @@ public class MemoryAuthDAO implements AuthDAO{
     }
 
     @Override
-    public void deleteAuth(String authToken) {
+    public void deleteAuth(String authToken) throws DataAccessException{
         authTokens.remove(authToken);
     }
 
     @Override
-    public AuthData getAuth(String authToken) {
+    public AuthData getAuth(String authToken) throws DataAccessException{
         return authTokens.get(authToken);
     }
 
     @Override
-    public void clearAuthData() {
+    public void clearAuthData() throws DataAccessException {
         if (!authTokens.isEmpty()) {
             authTokens.clear();
         }
