@@ -1,8 +1,9 @@
 package service;
 
 import dataaccess.AuthDAO;
+import dataaccess.DataAccessException;
 import dataaccess.UserDAO;
-import io.javalin.http.UnauthorizedResponse;
+import exception.ResponseException;
 import model.UserData;
 
 public class UserService {
@@ -13,16 +14,18 @@ public class UserService {
         this.authDAO = authDAO;
         this.userDAO = userDAO;
     }
-    public RegisterResult register(RegisterRequest registerRequest) throws UnauthorizedResponse {
-        var existingUser = userDAO.getUser(registerRequest.username());
-        if (existingUser != null) {
-            // TODO: implement error to be thrown if existingUser is not null
-            return null;
-        }
-        else {
-            userDAO.createUser(new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email()));
-            var authData = authDAO.createAuth(registerRequest.username());
-            return new RegisterResult(registerRequest.username(), authData.authToken());
+    public RegisterResult register(RegisterRequest registerRequest) throws ResponseException {
+        try {
+            var existingUser = userDAO.getUser(registerRequest.username());
+            if (existingUser != null) {
+                throw new ResponseException(ResponseException.Code.AlreadyTakenError, "Error: already taken");
+            } else {
+                userDAO.createUser(new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email()));
+                var authData = authDAO.createAuth(registerRequest.username());
+                return new RegisterResult(registerRequest.username(), authData.authToken());
+            }
+        } catch (DataAccessException ex) {
+            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
         }
     }
     public LoginResult login(LoginRequest loginRequest) {return null;}
