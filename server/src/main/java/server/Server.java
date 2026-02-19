@@ -1,8 +1,10 @@
 package server;
 
 import dataaccess.*;
+import exception.ResponseException;
 import handler.RegisterHandler;
 import io.javalin.*;
+import io.javalin.http.Context;
 import service.UserService;
 
 public class Server {
@@ -17,7 +19,7 @@ public class Server {
         authDAO = new MemoryAuthDAO();
         userService = new UserService(userDAO, authDAO);
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
-        createHandlers(javalin, userService);
+        createHandlers();
 
         // Register your endpoints and exception handlers here.
 
@@ -28,8 +30,9 @@ public class Server {
 //        createHandlers(javalin, userService);
 //    }
 
-    private void createHandlers(Javalin javalin, UserService userService) {
-        javalin.post("/user", new RegisterHandler(userService));
+    private void createHandlers() {
+        javalin.post("/user", new RegisterHandler(userService))
+                .exception(ResponseException.class, this::exceptionHandler);
     }
 
     public int run(int desiredPort) {
@@ -39,5 +42,10 @@ public class Server {
 
     public void stop() {
         javalin.stop();
+    }
+
+    private void exceptionHandler (ResponseException ex, Context ctx) {
+        ctx.status(ex.toHttpStatusCode());
+        ctx.json(ex.toJson());
     }
 }
