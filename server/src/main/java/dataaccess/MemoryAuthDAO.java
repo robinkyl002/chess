@@ -10,26 +10,42 @@ public class MemoryAuthDAO implements AuthDAO{
 
     @Override
     public AuthData createAuth(String username) throws DataAccessException {
-        String newToken = generateToken();
-        AuthData authData = new AuthData(newToken, username);
-        authTokens.put(newToken, authData);
-        return authData;
+        try {
+            String newToken = generateToken();
+            AuthData authData = new AuthData(newToken, username);
+            authTokens.put(newToken, authData);
+            return authData;
+        } catch (Exception e) {
+            throw new DataAccessException(e.getMessage());
+        }
     }
 
     @Override
     public void deleteAuth(String authToken) throws DataAccessException{
-        authTokens.remove(authToken);
+        try {
+            authTokens.remove(authToken);
+        } catch (Exception e) {
+            throw new DataAccessException(e.getMessage());
+        }
     }
 
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException{
-        return authTokens.get(authToken);
+        try {
+            return authTokens.get(authToken);
+        } catch (Exception e) {
+            throw new DataAccessException(e.getMessage());
+        }
     }
 
     @Override
     public void clearAuthData() throws DataAccessException {
-        if (!authTokens.isEmpty()) {
-            authTokens.clear();
+        try {
+            if (!authTokens.isEmpty()) {
+                authTokens.clear();
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(e.getMessage());
         }
     }
 
