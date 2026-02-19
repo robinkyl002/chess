@@ -44,5 +44,18 @@ public class UserService {
             throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
         }
     }
-    public void logout(LogoutRequest logoutRequest) throws ResponseException {}
+
+    public void logout(LogoutRequest logoutRequest) throws ResponseException {
+        try {
+            var existingAuth = authDAO.getAuth(logoutRequest.authToken());
+
+            if (existingAuth == null) {
+                throw new ResponseException(ResponseException.Code.UnauthorizedError, "Error: unauthorized");
+            }
+
+            authDAO.deleteAuth(logoutRequest.authToken());
+        } catch (DataAccessException ex) {
+            throw new ResponseException(ResponseException.Code.UnauthorizedError, ex.getMessage());
+        }
+    }
 }
