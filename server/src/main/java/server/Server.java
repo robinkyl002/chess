@@ -2,6 +2,7 @@ package server;
 
 import dataaccess.*;
 import exception.ResponseException;
+import handler.LoginHandler;
 import handler.RegisterHandler;
 import io.javalin.*;
 import io.javalin.http.Context;
@@ -32,6 +33,7 @@ public class Server {
 
     private void createHandlers() {
         javalin.post("/user", new RegisterHandler(userService))
+                .post("/session", new LoginHandler(userService))
                 .exception(ResponseException.class, this::exceptionHandler);
     }
 
