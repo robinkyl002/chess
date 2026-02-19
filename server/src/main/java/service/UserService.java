@@ -28,6 +28,21 @@ public class UserService {
             throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
         }
     }
-    public LoginResult login(LoginRequest loginRequest) {return null;}
-    public void logout(LogoutRequest logoutRequest) {}
+    public LoginResult login(LoginRequest loginRequest) throws ResponseException {
+        try {
+            var existingUser = userDAO.getUser(loginRequest.username());
+            if (existingUser == null) {
+                throw new ResponseException(ResponseException.Code.UnauthorizedError, "Error: unauthorized");
+            }
+
+            if (!existingUser.password().equals(loginRequest.password())) {
+                throw new ResponseException(ResponseException.Code.UnauthorizedError, "Error: unauthorized");
+            }
+            var authData = authDAO.createAuth(loginRequest.username());
+            return new LoginResult(authData.username(), authData.authToken());
+        } catch (DataAccessException ex) {
+            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
+        }
+    }
+    public void logout(LogoutRequest logoutRequest) throws ResponseException {}
 }
