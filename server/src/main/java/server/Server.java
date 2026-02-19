@@ -3,6 +3,7 @@ package server;
 import dataaccess.*;
 import exception.ResponseException;
 import handler.LoginHandler;
+import handler.LogoutHandler;
 import handler.RegisterHandler;
 import io.javalin.*;
 import io.javalin.http.Context;
@@ -12,12 +13,10 @@ public class Server {
 
     private final Javalin javalin;
     private final UserService userService;
-    private final UserDAO userDAO;
-    private final AuthDAO authDAO;
 
     public Server() {
-        userDAO = new MemoryUserDAO();
-        authDAO = new MemoryAuthDAO();
+        final UserDAO userDAO = new MemoryUserDAO();
+        final AuthDAO authDAO = new MemoryAuthDAO();
         userService = new UserService(userDAO, authDAO);
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
         createHandlers();
@@ -26,14 +25,10 @@ public class Server {
 
     }
 
-//    public Server(UserService userService) {
-//        javalin = Javalin.create(config -> config.staticFiles.add("web"));
-//        createHandlers(javalin, userService);
-//    }
-
     private void createHandlers() {
         javalin.post("/user", new RegisterHandler(userService))
                 .post("/session", new LoginHandler(userService))
+                .delete("/session", new LogoutHandler(userService))
                 .exception(ResponseException.class, this::exceptionHandler);
     }
 
