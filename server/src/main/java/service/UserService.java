@@ -68,4 +68,20 @@ public class UserService {
             throw new ResponseException(ServerError, errorMessageFromCode(ServerError) + ex.getMessage());
         }
     }
+
+    public void clearUserData() throws ResponseException {
+        try {
+            userDAO.deleteUsers();
+        } catch (DataAccessException e) {
+            throw new ResponseException(ServerError, errorMessageFromCode(ServerError) + e.getMessage());
+        }
+    }
+
+    public void clearAuthData() throws ResponseException {
+        try {
+            authDAO.clearAuthData();
+        } catch (DataAccessException e) {
+            throw new ResponseException(ServerError, errorMessageFromCode(ServerError) + e.getMessage());
+        }
+    }
 }

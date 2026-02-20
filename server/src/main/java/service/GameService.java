@@ -31,4 +31,12 @@ public class GameService {
     public void joinGame() throws ResponseException {}
     public void listGames() throws ResponseException {}
     public void getGame() throws ResponseException {}
+
+    public void clearAllGames() throws ResponseException {
+        try {
+            gameDAO.clearGameData();
+        } catch (DataAccessException e) {
+            throw new ResponseException(ServerError, errorMessageFromCode(ServerError) + e.getMessage());
+        }
+    }
 }
