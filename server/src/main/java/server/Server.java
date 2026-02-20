@@ -32,6 +32,7 @@ public class Server {
                 .post("/session", new LoginHandler(userService))
                 .delete("/session", new LogoutHandler(userService))
                 .post("/game", new CreateGameHandler(userService, gameService))
+                .delete("/db", new ClearDataHandler(userService, gameService))
                 .exception(ResponseException.class, this::exceptionHandler);
     }
 
