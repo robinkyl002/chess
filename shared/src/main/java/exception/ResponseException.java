@@ -54,4 +54,13 @@ public class ResponseException extends Exception {
             case AlreadyTakenError -> 403;
         };
     }
+
+    public static String errorMessageFromCode(Code enteredCode) {
+        return switch(enteredCode) {
+            case ServerError -> "Error: ";
+            case BadRequestError -> "Error: bad request";
+            case UnauthorizedError -> "Error: unauthorized";
+            case AlreadyTakenError -> "Error: already taken";
+        };
+    }
 }
