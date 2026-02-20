@@ -18,6 +18,8 @@ public class ClearDataHandler implements Handler {
 
     @Override
     public void handle(@NotNull Context context) throws ResponseException {
-
+        userService.clearUserData();
+        userService.clearAuthData();
+        gameService.clearAllGames();
     }
 }
