@@ -2,9 +2,7 @@ package server;
 
 import dataaccess.*;
 import exception.ResponseException;
-import handler.LoginHandler;
-import handler.LogoutHandler;
-import handler.RegisterHandler;
+import handler.*;
 import io.javalin.*;
 import io.javalin.http.Context;
 import service.UserService;
