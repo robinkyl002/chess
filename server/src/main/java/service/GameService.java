@@ -1,10 +1,12 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
 import exception.ResponseException;
 import model.AuthData;
+import model.GameData;
 
 import static exception.ResponseException.Code.*;
 import static exception.ResponseException.errorMessageFromCode;
@@ -32,19 +34,25 @@ public class GameService {
     }
     public void joinGame(JoinGameRequest joinGameRequest, String authToken) throws ResponseException {
         try {
-            if (joinGameRequest.color() == null || joinGameRequest.gameID() == null) {
+            if (joinGameRequest.playerColor() == null || joinGameRequest.gameID() == null) {
                 throw new ResponseException(BadRequestError, errorMessageFromCode(BadRequestError));
             }
 
             AuthData auth = authDAO.getAuth(authToken);
 
-            gameDAO.updateGame(joinGameRequest.gameID(), auth.username(), joinGameRequest.color());
+            GameData currGame = gameDAO.getGame(joinGameRequest.gameID());
+
+            // Check to make sure the color is not already taken by someone else
+            if ((joinGameRequest.playerColor() == ChessGame.TeamColor.WHITE && currGame.whiteUsername() != null)
+                    || (joinGameRequest.playerColor() == ChessGame.TeamColor.BLACK && currGame.blackUsername() != null)) {
+                    throw new ResponseException(AlreadyTakenError, errorMessageFromCode(AlreadyTakenError));
+            }
+            gameDAO.updateGame(joinGameRequest.gameID(), auth.username(), joinGameRequest.playerColor());
         } catch (DataAccessException ex) {
             throw new ResponseException(ServerError, errorMessageFromCode(ServerError) + ex.getMessage());
         }
     }
     public void listGames() throws ResponseException {}
-    public void getGame() throws ResponseException {}
 
     public void clearAllGames() throws ResponseException {
         try {
