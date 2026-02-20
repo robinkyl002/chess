@@ -47,15 +47,23 @@ public class UserService {
 
     public void logout(LogoutRequest logoutRequest) throws ResponseException {
         try {
-            var existingAuth = authDAO.getAuth(logoutRequest.authToken());
-
-            if (existingAuth == null) {
-                throw new ResponseException(ResponseException.Code.UnauthorizedError, "Error: unauthorized");
-            }
-
             authDAO.deleteAuth(logoutRequest.authToken());
         } catch (DataAccessException ex) {
             throw new ResponseException(ResponseException.Code.UnauthorizedError, ex.getMessage());
+        }
+    }
+
+    public boolean validAuth(String authToken) throws ResponseException {
+        try {
+            boolean valid = false;
+            if (authToken == null || authToken.isEmpty()) {
+                return valid;
+            }
+            var existingAuth = authDAO.getAuth(authToken);
+
+            return existingAuth != null;
+        } catch (DataAccessException ex) {
+            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
         }
     }
 }
