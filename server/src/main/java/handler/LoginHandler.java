@@ -9,6 +9,9 @@ import service.LoginRequest;
 import service.LoginResult;
 import service.UserService;
 
+import static exception.ResponseException.Code.BadRequestError;
+import static exception.ResponseException.errorMessageFromCode;
+
 public class LoginHandler implements Handler {
     private final UserService userService;
 
@@ -21,7 +24,7 @@ public class LoginHandler implements Handler {
 
         if (loginRequest.username() == null || loginRequest.password() == null
                 || loginRequest.username().isEmpty() || loginRequest.password().isEmpty()) {
-            throw new ResponseException(ResponseException.Code.BadRequestError, "Error: bad request");
+            throw new ResponseException(BadRequestError, errorMessageFromCode(BadRequestError));
         }
         LoginResult result = userService.login(loginRequest);
         context.status(200);
