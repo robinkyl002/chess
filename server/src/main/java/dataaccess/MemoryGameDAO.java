@@ -12,8 +12,7 @@ public class MemoryGameDAO implements GameDAO {
     @Override
     public int createGame(String gameName) throws DataAccessException {
         try {
-            var game = new GameData(nextId++, null, null,
-                    gameName, new ChessGame());
+            var game = new GameData(nextId++, null, null, gameName, new ChessGame());
             games.put(game.gameID(), game);
             return game.gameID();
         } catch (Exception e) {
