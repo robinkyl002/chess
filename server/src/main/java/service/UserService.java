@@ -5,6 +5,8 @@ import dataaccess.DataAccessException;
 import dataaccess.UserDAO;
 import exception.ResponseException;
 import model.UserData;
+import static exception.ResponseException.Code.*;
+import static exception.ResponseException.errorMessageFromCode;
 
 public class UserService {
     private final UserDAO userDAO;
@@ -18,30 +20,30 @@ public class UserService {
         try {
             var existingUser = userDAO.getUser(registerRequest.username());
             if (existingUser != null) {
-                throw new ResponseException(ResponseException.Code.AlreadyTakenError, "Error: already taken");
+                throw new ResponseException(AlreadyTakenError, errorMessageFromCode(AlreadyTakenError));
             } else {
                 userDAO.createUser(new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email()));
                 var authData = authDAO.createAuth(registerRequest.username());
                 return new RegisterResult(registerRequest.username(), authData.authToken());
             }
         } catch (DataAccessException ex) {
-            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
+            throw new ResponseException(ServerError, errorMessageFromCode(ServerError) + ex.getMessage());
         }
     }
     public LoginResult login(LoginRequest loginRequest) throws ResponseException {
         try {
             var existingUser = userDAO.getUser(loginRequest.username());
             if (existingUser == null) {
-                throw new ResponseException(ResponseException.Code.UnauthorizedError, "Error: unauthorized");
+                throw new ResponseException(UnauthorizedError, errorMessageFromCode(UnauthorizedError));
             }
 
             if (!existingUser.password().equals(loginRequest.password())) {
-                throw new ResponseException(ResponseException.Code.UnauthorizedError, "Error: unauthorized");
+                throw new ResponseException(UnauthorizedError, errorMessageFromCode(UnauthorizedError));
             }
             var authData = authDAO.createAuth(loginRequest.username());
             return new LoginResult(authData.username(), authData.authToken());
         } catch (DataAccessException ex) {
-            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
+            throw new ResponseException(ServerError, errorMessageFromCode(ServerError) + ex.getMessage());
         }
     }
 
@@ -49,7 +51,7 @@ public class UserService {
         try {
             authDAO.deleteAuth(logoutRequest.authToken());
         } catch (DataAccessException ex) {
-            throw new ResponseException(ResponseException.Code.UnauthorizedError, ex.getMessage());
+            throw new ResponseException(ServerError, errorMessageFromCode(ServerError) + ex.getMessage());
         }
     }
 
@@ -63,7 +65,7 @@ public class UserService {
 
             return existingAuth != null;
         } catch (DataAccessException ex) {
-            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
+            throw new ResponseException(ServerError, errorMessageFromCode(ServerError) + ex.getMessage());
         }
     }
 }

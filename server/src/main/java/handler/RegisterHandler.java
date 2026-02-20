@@ -8,6 +8,9 @@ import org.jetbrains.annotations.NotNull;
 import service.RegisterRequest;
 import service.UserService;
 
+import static exception.ResponseException.Code.BadRequestError;
+import static exception.ResponseException.errorMessageFromCode;
+
 public class RegisterHandler implements Handler {
     private final UserService userService;
 
@@ -21,7 +24,7 @@ public class RegisterHandler implements Handler {
         if (registerRequest.username() == null || registerRequest.password() == null
                 || registerRequest.email() == null || registerRequest.username().isEmpty()
                 || registerRequest.password().isEmpty() || registerRequest.email().isEmpty()) {
-            throw new ResponseException(ResponseException.Code.BadRequestError, "Error: bad request");
+            throw new ResponseException(BadRequestError, errorMessageFromCode(BadRequestError));
         }
         var result = userService.register(registerRequest);
         context.status(200);
