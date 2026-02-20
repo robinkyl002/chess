@@ -4,6 +4,8 @@ import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
 import exception.ResponseException;
+import model.AuthData;
+
 import static exception.ResponseException.Code.*;
 import static exception.ResponseException.errorMessageFromCode;
 
@@ -28,7 +30,19 @@ public class GameService {
             throw new ResponseException(ServerError, errorMessageFromCode(ServerError) + ex.getMessage());
         }
     }
-    public void joinGame() throws ResponseException {}
+    public void joinGame(JoinGameRequest joinGameRequest, String authToken) throws ResponseException {
+        try {
+            if (joinGameRequest.color() == null || joinGameRequest.gameID() == null) {
+                throw new ResponseException(BadRequestError, errorMessageFromCode(BadRequestError));
+            }
+
+            AuthData auth = authDAO.getAuth(authToken);
+
+            gameDAO.updateGame(joinGameRequest.gameID(), auth.username(), joinGameRequest.color());
+        } catch (DataAccessException ex) {
+            throw new ResponseException(ServerError, errorMessageFromCode(ServerError) + ex.getMessage());
+        }
+    }
     public void listGames() throws ResponseException {}
     public void getGame() throws ResponseException {}
 
