@@ -17,11 +17,13 @@ public class LogoutHandler implements Handler {
 
     @Override
     public void handle(@NotNull Context context) throws ResponseException {
-        var logoutRequest = new Gson().fromJson(context.header("Authorization"), LogoutRequest.class);
+        String authToken = context.header("Authorization");
+        if (authToken == null || authToken.isEmpty()) {
+            throw new ResponseException(ResponseException.Code.UnauthorizedError, "Error: unauthorized");
+        }
 
-        userService.logout(logoutRequest);
+        userService.logout(new LogoutRequest(authToken));
 
-        context.status(200);
-        context.json("");
+        context.status(200).json("");
     }
 }
