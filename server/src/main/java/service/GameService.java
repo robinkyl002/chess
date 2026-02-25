@@ -8,6 +8,10 @@ import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import static exception.ResponseException.Code.*;
 import static exception.ResponseException.errorMessageFromCode;
 
@@ -52,7 +56,19 @@ public class GameService {
             throw new ResponseException(ServerError, errorMessageFromCode(ServerError) + ex.getMessage());
         }
     }
-    public void listGames() throws ResponseException {}
+    public ListGamesResult listGames() throws ResponseException {
+        try {
+            Collection<GameData> games = gameDAO.listGames();
+            List<GameSummary> summaries = new ArrayList<GameSummary>();
+            for (var game: games) {
+                summaries.add(new GameSummary(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName()));
+            }
+
+            return new ListGamesResult(summaries);
+        } catch (DataAccessException ex) {
+            throw new ResponseException(ServerError, errorMessageFromCode(ServerError) + ex.getMessage());
+        }
+    }
 
     public void clearAllGames() throws ResponseException {
         try {
