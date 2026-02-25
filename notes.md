@@ -38,3 +38,29 @@ public record Person(String name, int age) {}
 - Polymorphism - Parent class can represent any of its subclasses
   - Can create array of Vehicle and put the subclass objects Car, Truck, Boat, Airplane all in the array
   - Can declare method on a super class cast
+
+## Code from ResponseException to be used by Phase 4 
+
+```java
+
+    public static ResponseException fromJson(String json) {
+        var map = new Gson().fromJson(json, HashMap.class);
+        var status = Code.valueOf(map.get("status").toString());
+        String message = map.get("message").toString();
+        return new ResponseException(status, message);
+    }
+
+    public Code code() {
+        return code;
+    }
+
+    public static Code fromHttpStatusCode(int httpStatusCode) {
+        return switch (httpStatusCode) {
+            case 500 -> Code.ServerError;
+            case 400 -> Code.BadRequestError;
+            case 401 -> Code.UnauthorizedError;
+            case 403 -> Code.AlreadyTakenError;
+            default -> throw new IllegalArgumentException("Unknown HTTP status code: " + httpStatusCode);
+        };
+    }
+```
