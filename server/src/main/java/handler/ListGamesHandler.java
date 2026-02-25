@@ -1,11 +1,12 @@
 package handler;
 
+import com.google.gson.Gson;
 import exception.ResponseException;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import org.jetbrains.annotations.NotNull;
-import service.GameService;
-import service.UserService;
+import service.*;
+
 import static exception.ResponseException.Code.*;
 import static exception.ResponseException.errorMessageFromCode;
 
@@ -25,5 +26,9 @@ public class ListGamesHandler implements Handler {
         if (!userService.validAuth(authToken)) {
             throw new ResponseException(UnauthorizedError, errorMessageFromCode(UnauthorizedError));
         }
+
+        ListGamesResult result = gameService.listGames();
+
+        context.status(200).json(new Gson().toJson(result));
     }
 }
