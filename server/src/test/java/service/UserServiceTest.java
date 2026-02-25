@@ -39,30 +39,54 @@ class UserServiceTest {
     @Test
     @Order(2)
     @DisplayName("Register Failed - Already Taken")
-    void registerAlreadyTaken() {
+    void registerAlreadyTaken() throws ResponseException {
+        userService.register(new RegisterRequest(existingUser.getUsername(), existingUser.getPassword(), existingUser.getEmail()));
+        assertThrows(ResponseException.class, () -> {
+            userService.register(new RegisterRequest(existingUser.getUsername(),
+                    existingUser.getPassword(), existingUser.getEmail()));
+        }, "Error: already taken");
     }
 
     @Test
     @Order(3)
     @DisplayName("Login Successful")
-    void loginSuccessful() {
+    void loginSuccessful() throws ResponseException {
+        userService.register(new RegisterRequest(existingUser.getUsername(), existingUser.getPassword(), existingUser.getEmail()));
+
+        var loginResult = userService.login(new LoginRequest(existingUser.getUsername(), existingUser.getPassword()));
+
+        assertNotNull(loginResult);
+        assertEquals(existingUser.getUsername(), loginResult.username());
+        assertNotNull(loginResult.authToken());
     }
 
     @Test
     @Order(4)
     @DisplayName("Unauthorized Login")
-    void loginUnauthorized() {
+    void loginUnauthorized() throws ResponseException {
+        userService.register(new RegisterRequest(existingUser.getUsername(), existingUser.getPassword(), existingUser.getEmail()));
+
+        assertThrows(ResponseException.class, () -> {
+            userService.login(new LoginRequest(existingUser.getUsername(), "wrongPassword"));
+        }, "Error: unauthorized");
     }
 
     @Test
     @Order(5)
     @DisplayName("Logout Successful")
-    void logoutSuccessful() {
+    void logoutSuccessful() throws ResponseException {
+        var registerResult = userService.register(new RegisterRequest(existingUser.getUsername(),
+                existingUser.getPassword(), existingUser.getEmail()));
+
+        assertDoesNotThrow(() -> {userService.logout(new LogoutRequest(registerResult.authToken())); });
     }
 
     @Test
     @Order(6)
     @DisplayName("Unauthorized Logout")
     void logoutUnauthorized() {
+        assertThrows(ResponseException.class, () -> {
+            userService.logout(new LogoutRequest("authToken"));
+        }, "Error: unauthorized");
     }
 }
