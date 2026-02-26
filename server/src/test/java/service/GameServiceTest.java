@@ -69,7 +69,7 @@ class GameServiceTest {
         gameService.createGame(new CreateGameRequest("New Game"));
 
         assertThrows(ResponseException.class,
-                () -> gameService.joinGame(new JoinGameRequest(ChessGame.TeamColor.WHITE, 1), registerResult.authToken()));
+                () -> gameService.joinGame(new JoinGameRequest(ChessGame.TeamColor.WHITE, null), registerResult.authToken()));
     }
 
     @Test
