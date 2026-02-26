@@ -3,11 +3,14 @@ package service;
 import chess.ChessGame;
 import dataaccess.*;
 import exception.ResponseException;
+import model.GameData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import passoff.model.TestUser;
+
+import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -78,11 +81,33 @@ class GameServiceTest {
         assertNotNull(gameList);
     }
 
+    static class BrokenGameDAO implements GameDAO {
+
+        @Override
+        public int createGame(String gameName) throws DataAccessException {return 0;}
+
+        @Override
+        public GameData getGame(int gameID) throws DataAccessException {return null;}
+
+        @Override
+        public Collection<GameData> listGames() throws DataAccessException {
+            throw new DataAccessException("Can't get list of games");
+        }
+
+        @Override
+        public void updateGame(int gameID, String username, ChessGame.TeamColor color) throws DataAccessException {}
+
+        @Override
+        public void clearGameData() throws DataAccessException {}
+    }
+
     @Test
     @Order(6)
     @DisplayName("List Games - Server Error")
     void listGamesServerError() {
+        var brokenGameService = new GameService(authDAO, new BrokenGameDAO());
 
+        assertThrows(ResponseException.class, brokenGameService::listGames, "Error: Can't get list of games");
     }
 
     @Test
