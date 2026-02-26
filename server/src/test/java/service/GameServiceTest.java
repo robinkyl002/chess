@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.*;
 import exception.ResponseException;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,32 +40,63 @@ class GameServiceTest {
     @Test
     @Order(2)
     @DisplayName("Create Game - Empty Game Name")
-    void createGameEmptyGameName() throws ResponseException {
-
+    void createGameEmptyGameName() {
         assertThrows(ResponseException.class, () -> gameService.createGame(new CreateGameRequest("")), "Error: bad request");
     }
 
     @Test
     @Order(3)
     @DisplayName("Join Game Successful")
-    void joinGameSuccessful() {
+    void joinGameSuccessful() throws ResponseException {
+        var registerResult = userService.register(new RegisterRequest(existingUser.getUsername(),
+                existingUser.getPassword(), existingUser.getEmail()));
+
+        gameService.createGame(new CreateGameRequest("New Game"));
+
+        assertDoesNotThrow(() -> gameService.joinGame(new JoinGameRequest(ChessGame.TeamColor.WHITE, 1), registerResult.authToken()));
     }
 
     @Test
     @Order(4)
     @DisplayName("Join Game - Game ID Empty")
-    void joinGame() {
+    void joinGame() throws ResponseException {
+        var registerResult = userService.register(new RegisterRequest(existingUser.getUsername(),
+                existingUser.getPassword(), existingUser.getEmail()));
+
+        gameService.createGame(new CreateGameRequest("New Game"));
+
+        assertThrows(ResponseException.class,
+                () -> gameService.joinGame(new JoinGameRequest(ChessGame.TeamColor.WHITE, 1), registerResult.authToken()));
     }
 
     @Test
     @Order(5)
     @DisplayName("List Games Successful")
-    void listGamesSuccessful() {
+    void listGamesSuccessful() throws ResponseException {
+        var gameList = gameService.listGames();
+
+        assertNotNull(gameList);
     }
 
     @Test
     @Order(6)
-    @DisplayName("List Games - Unauthorized")
-    void listGamesUnauthorized() {
+    @DisplayName("List Games - Server Error")
+    void listGamesServerError() {
+
+    }
+
+    @Test
+    @Order(7)
+    @DisplayName("Clear Database Successful")
+    void clearDB() throws ResponseException {
+        assertDoesNotThrow(userService::clearUserData);
+        assertDoesNotThrow(userService::clearAuthData);
+        assertDoesNotThrow(gameService::clearAllGames);
+
+        userService.register(new RegisterRequest(existingUser.getUsername(), existingUser.getPassword(), existingUser.getEmail()));
+        gameService.createGame(new CreateGameRequest("newGame"));
+        assertDoesNotThrow(userService::clearUserData);
+        assertDoesNotThrow(userService::clearAuthData);
+        assertDoesNotThrow(gameService::clearAllGames);
     }
 }
