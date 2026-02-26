@@ -2,6 +2,7 @@ package service;
 
 import dataaccess.*;
 import exception.ResponseException;
+import model.AuthData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
@@ -81,12 +82,37 @@ class UserServiceTest {
         assertDoesNotThrow(() -> {userService.logout(new LogoutRequest(registerResult.authToken())); });
     }
 
+    static class BrokenAuthDAO implements AuthDAO {
+
+        @Override
+        public AuthData createAuth(String username) throws DataAccessException {
+            return null;
+        }
+
+        @Override
+        public AuthData getAuth(String authToken) throws DataAccessException {
+            return null;
+        }
+
+        @Override
+        public void deleteAuth(String authToken) throws DataAccessException {
+            throw new DataAccessException("Could not delete token");
+        }
+
+        @Override
+        public void clearAuthData() throws DataAccessException {
+
+        }
+    }
+
     @Test
     @Order(6)
-    @DisplayName("Unauthorized Logout")
-    void logoutUnauthorized() {
+    @DisplayName("Logout - Server Error")
+    void logoutDataAccessException() throws ResponseException {
+        var brokenUserService = new UserService(userDAO, new BrokenAuthDAO());
+
         assertThrows(ResponseException.class, () -> {
-            userService.logout(new LogoutRequest("authToken"));
-        }, "Error: unauthorized");
+            brokenUserService.logout(new LogoutRequest("authToken"));
+        });
     }
 }
