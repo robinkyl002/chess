@@ -27,6 +27,14 @@ public class Server {
 
     }
 
+    public Server(UserService userService, GameService gameService) {
+        this.userService = userService;
+        this.gameService = gameService;
+
+        javalin = Javalin.create(config -> config.staticFiles.add("web"));
+        createHandlers();
+    }
+
     private void createHandlers() {
         javalin.post("/user", new RegisterHandler(userService))
                 .post("/session", new LoginHandler(userService))
