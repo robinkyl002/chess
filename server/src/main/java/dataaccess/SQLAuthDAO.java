@@ -43,7 +43,7 @@ public class SQLAuthDAO implements AuthDAO {
                 }
             }
         } catch (Exception e) {
-            throw new DataAccessException(String.format("Unable to retrieve user from database: %s", e.getMessage()), e);
+            throw new DataAccessException(String.format("Unable to retrieve auth data from database: %s", e.getMessage()), e);
         }
 
         return null;
