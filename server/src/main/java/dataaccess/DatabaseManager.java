@@ -38,7 +38,7 @@ public class DatabaseManager {
                 `username` varchar(256) NOT NULL,
                 `authToken` varchar(256) NOT NULL,
                 PRIMARY KEY (`authToken`),
-                INDEX (username)
+                INDEX (username),
                     CONSTRAINT `fk_auth_username`
                         FOREIGN KEY (`username`)
                         REFERENCES user(`username`)
@@ -62,11 +62,11 @@ public class DatabaseManager {
                         REFERENCES user(`username`)
                         ON DELETE SET NULL
                         ON UPDATE CASCADE,
-                    CONSTRAINT `fk_game_white_username`
-                        FOREIGN KEY (`whiteUsername`)
-                        REFERENCES user(`username`)
-                        ON DELETE SET NULL
-                        ON UPDATE CASCADE
+                CONSTRAINT `fk_game_white_username`
+                    FOREIGN KEY (`whiteUsername`)
+                    REFERENCES user(`username`)
+                    ON DELETE SET NULL
+                    ON UPDATE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
     };
