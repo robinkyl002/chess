@@ -54,7 +54,7 @@ public class DatabaseManager {
                 `blackUsername` varchar(256) DEFAULT NULL,
                 `whiteUsername` varchar(256) DEFAULT NULL,
                 `chessGame` TEXT NOT NULL,
-                PRIMARY KEY (`gameID`),
+                PRIMARY KEY (`id`),
                 INDEX(gameName),
                 INDEX(blackUsername),
                 INDEX(whiteUsername),
