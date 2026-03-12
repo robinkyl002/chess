@@ -1,7 +1,9 @@
 package dataaccess;
 
 import chess.ChessGame;
+import exception.ResponseException;
 import model.GameData;
+import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -102,8 +104,13 @@ class GameDAOTest {
     @ParameterizedTest
     @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
     @DisplayName("Join Game Successful")
-    void joinGame(Class<? extends GameDAO> gameDAOClass) throws DataAccessException {
+    void joinGame(Class<? extends GameDAO> gameDAOClass) throws DataAccessException, ResponseException {
         GameDAO gameDAO = getDataAccess(gameDAOClass);
+        if (gameDAO instanceof SQLGameDAO) {
+            UserDAO sqlUserDAO = new SQLUserDAO();
+            sqlUserDAO.createUser(new UserData(existingUser.getUsername(), existingUser.getPassword(), existingUser.getEmail()));
+        }
+
         int id = gameDAO.createGame("test");
 
         assertDoesNotThrow(() -> gameDAO.joinGame(id, existingUser.getUsername(), ChessGame.TeamColor.WHITE));
