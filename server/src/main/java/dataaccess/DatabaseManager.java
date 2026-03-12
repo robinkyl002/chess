@@ -24,9 +24,9 @@ public class DatabaseManager {
     private static final String[] CREATE_STATEMENTS = {
             """
             CREATE TABLE IF NOT EXISTS user(
-               `username` varchar(256),
-               `password` varchar(256),
-               `email` varchar(256),
+               `username` varchar(256) NOT NULL,
+               `password` varchar(256) NOT NULL,
+               `email` varchar(256) NOT NULL,
                PRIMARY KEY (`username`),
                INDEX(password),
                INDEX(email)
@@ -35,14 +35,42 @@ public class DatabaseManager {
             ,
             """
             CREATE TABLE IF NOT EXISTS auth(
-                `username` varchar(256),
-                `authToken` varchar(256),
+                `username` varchar(256) NOT NULL,
+                `authToken` varchar(256) NOT NULL,
                 PRIMARY KEY (`authToken`),
                 INDEX (username)
+                    CONSTRAINT `fk_auth_username`
+                        FOREIGN KEY (`username`)
+                        REFERENCES user(`username`)
+                        ON DELETE CASCADE
+                        ON UPDATE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+            """
+            ,
+            """
+            CREATE TABLE IF NOT EXISTS game(
+                `gameID` int NOT NULL AUTO_INCREMENT,
+                `gameName` varchar(256) NOT NULL,
+                `blackUsername` varchar(256) DEFAULT NULL,
+                `whiteUsername` varchar(256) DEFAULT NULL,
+                PRIMARY KEY (`gameID`),
+                INDEX(gameName),
+                INDEX(blackUsername),
+                INDEX(whiteUsername),
+                CONSTRAINT `fk_game_black_username`
+                        FOREIGN KEY (`blackUsername`)
+                        REFERENCES user(`username`)
+                        ON DELETE SET NULL
+                        ON UPDATE CASCADE,
+                    CONSTRAINT `fk_game_white_username`
+                        FOREIGN KEY (`whiteUsername`)
+                        REFERENCES user(`username`)
+                        ON DELETE SET NULL
+                        ON UPDATE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
     };
-    private void configureDatabase() throws DataAccessException {
+    static public void configureDatabase() throws DataAccessException {
         DatabaseManager.createDatabase();
         try (Connection conn = DatabaseManager.getConnection()) {
             for (String statement : CREATE_STATEMENTS) {
