@@ -55,11 +55,36 @@ class AuthDAOTest {
 
     @ParameterizedTest
     @ValueSource(classes = {MemoryAuthDAO.class, SQLAuthDAO.class})
-    @DisplayName("Delete Auth Successful")
-    void deleteAuth(Class<? extends AuthDAO> authDAOClass) throws DataAccessException {
+    @DisplayName("Get Auth - Auth Does Not Exist")
+    void authDoesNotExist(Class<? extends AuthDAO> authDAOClass) throws DataAccessException {
         AuthDAO authDAO = getDataAccess(authDAOClass);
         var authData = authDAO.createAuth(existingUser.getUsername());
 
+        authDAO.deleteAuth(authData.authToken());
+
+        AuthData returnValue = authDAO.getAuth(authData.authToken());
+
+        assertNull(returnValue);
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {MemoryAuthDAO.class, SQLAuthDAO.class})
+    @DisplayName("Delete Auth Successful")
+    void deleteAuthSuccessful(Class<? extends AuthDAO> authDAOClass) throws DataAccessException {
+        AuthDAO authDAO = getDataAccess(authDAOClass);
+        var authData = authDAO.createAuth(existingUser.getUsername());
+
+        assertDoesNotThrow(()->authDAO.deleteAuth(authData.authToken()));
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {MemoryAuthDAO.class, SQLAuthDAO.class})
+    @DisplayName("Delete Auth - Does not exist")
+    void deleteAuthThatDoesNotExist(Class<? extends AuthDAO> authDAOClass) throws DataAccessException {
+        AuthDAO authDAO = getDataAccess(authDAOClass);
+        var authData = authDAO.createAuth(existingUser.getUsername());
+
+        authDAO.deleteAuth(authData.authToken());
         assertDoesNotThrow(()->authDAO.deleteAuth(authData.authToken()));
     }
 
