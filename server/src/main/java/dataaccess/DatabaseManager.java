@@ -49,14 +49,16 @@ public class DatabaseManager {
             ,
             """
             CREATE TABLE IF NOT EXISTS game(
-                `gameID` int NOT NULL AUTO_INCREMENT,
+                `id` int NOT NULL AUTO_INCREMENT,
                 `gameName` varchar(256) NOT NULL,
                 `blackUsername` varchar(256) DEFAULT NULL,
                 `whiteUsername` varchar(256) DEFAULT NULL,
+                `chessGame` TEXT NOT NULL,
                 PRIMARY KEY (`gameID`),
                 INDEX(gameName),
                 INDEX(blackUsername),
                 INDEX(whiteUsername),
+                INDEX(chessGame),
                 CONSTRAINT `fk_game_black_username`
                         FOREIGN KEY (`blackUsername`)
                         REFERENCES user(`username`)
