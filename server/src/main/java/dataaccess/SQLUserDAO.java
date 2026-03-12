@@ -7,6 +7,7 @@ import org.mindrot.jbcrypt.BCrypt;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class SQLUserDAO implements UserDAO {
 
@@ -22,13 +23,26 @@ public class SQLUserDAO implements UserDAO {
     public void createUser(UserData user) throws DataAccessException {
         var statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
         String hashedPassword = BCrypt.hashpw(user.password(), BCrypt.gensalt());
-        int id = DatabaseManager.executeUpdate(statement, user.username(), hashedPassword, user.email());
+        DatabaseManager.executeUpdate(statement, user.username(), hashedPassword, user.email());
     }
 
     @Override
     public void deleteUsers() throws DataAccessException {
-        var statement = "TRUNCATE user";
-        DatabaseManager.executeUpdate(statement);
+        try (Connection conn = DatabaseManager.getConnection()){
+            try (PreparedStatement ps = conn.prepareStatement("SET FOREIGN_KEY_CHECKS = 0")) {
+                ps.executeUpdate();
+            }
+
+            try (PreparedStatement ps = conn.prepareStatement("TRUNCATE user")) {
+                ps.executeUpdate();
+            }
+
+            try (PreparedStatement ps = conn.prepareStatement("SET FOREIGN_KEY_CHECKS = 1")) {
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Could not clear user table", e);
+        }
     }
 
     @Override
