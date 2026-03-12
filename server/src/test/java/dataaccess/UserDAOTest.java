@@ -35,12 +35,10 @@ class UserDAOTest {
     @ParameterizedTest
     @ValueSource(classes = {MemoryUserDAO.class, SQLUserDAO.class})
     @DisplayName("Successfully created a user")
-    void createUserSuccessful(Class<?extends UserDAO> dbClass) throws DataAccessException {
+    void createUserSuccessful(Class<?extends UserDAO> dbClass) {
         UserDAO userDAO = getDataAccess(dbClass);
-        assertDoesNotThrow(() -> {
-            userDAO.createUser(new UserData(existingUser.getUsername(),
-                    existingUser.getPassword(), existingUser.getEmail()));});
-    }
+        assertDoesNotThrow(() -> {userDAO.createUser(new UserData(existingUser.getUsername(),
+                existingUser.getPassword(), existingUser.getEmail()));});}
 
     @ParameterizedTest
     @ValueSource(classes = {MemoryUserDAO.class, SQLUserDAO.class})
