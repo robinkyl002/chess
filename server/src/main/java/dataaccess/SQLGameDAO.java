@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 public class SQLGameDAO implements GameDAO {
@@ -50,7 +51,20 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public Collection<GameData> listGames() throws DataAccessException {
-        return List.of();
+        var result = new HashSet<GameData>();
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT * FROM game";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        result.add(readGame(rs));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(String.format("Unable to retrieve game from database: %s", e.getMessage()), e);
+        }
+        return result;
     }
 
     @Override
