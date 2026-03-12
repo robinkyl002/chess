@@ -47,7 +47,7 @@ class GameDAOTest {
     @ParameterizedTest
     @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
     @DisplayName("Cannot Create Game - Name Is Empty")
-    void createGameFailedGameNameEmpty(Class<? extends GameDAO> gameDAOClass) throws DataAccessException {
+    void createGameFailedGameNameEmpty(Class<? extends GameDAO> gameDAOClass) {
         GameDAO gameDAO = getDataAccess(gameDAOClass);
 
         assertThrows(DataAccessException.class, () -> gameDAO.createGame(null));
@@ -114,7 +114,7 @@ class GameDAOTest {
     @ParameterizedTest
     @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
     @DisplayName("Game not created")
-    void gameDoesNotExist (Class<? extends GameDAO> gameDAOClass) throws DataAccessException {
+    void gameDoesNotExist (Class<? extends GameDAO> gameDAOClass) {
         GameDAO gameDAO = getDataAccess(gameDAOClass);
 
         assertThrows(DataAccessException.class, () -> gameDAO.joinGame(1, existingUser.getUsername(), ChessGame.TeamColor.WHITE));
