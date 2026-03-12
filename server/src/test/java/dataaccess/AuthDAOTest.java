@@ -42,6 +42,15 @@ class AuthDAOTest {
 
     @ParameterizedTest
     @ValueSource(classes = {MemoryAuthDAO.class, SQLAuthDAO.class})
+    @DisplayName("Create Auth Failed - Username Null")
+    void createAuthFailedNullUsername(Class<? extends AuthDAO> authDAOClass) {
+        AuthDAO authDAO = getDataAccess(authDAOClass);
+
+        assertThrows(DataAccessException.class, () -> authDAO.createAuth(null));
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {MemoryAuthDAO.class, SQLAuthDAO.class})
     @DisplayName("Get Auth Successful")
     void getAuthSuccessful(Class<? extends AuthDAO> authDAOClass) throws DataAccessException {
         AuthDAO authDAO = getDataAccess(authDAOClass);
