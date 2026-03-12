@@ -21,6 +21,9 @@ public class SQLAuthDAO implements AuthDAO {
 
     @Override
     public AuthData createAuth(String username) throws DataAccessException {
+        if (username == null || username.isBlank()) {
+            throw new DataAccessException("Username cannot be null or blank");
+        }
         var statement = "INSERT INTO auth (username, authToken) VALUES (?, ?)";
         String authToken = generateToken();
 
