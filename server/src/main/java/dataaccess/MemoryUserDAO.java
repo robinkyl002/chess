@@ -11,6 +11,9 @@ public class MemoryUserDAO implements UserDAO{
     @Override
     public void createUser(UserData user) throws DataAccessException{
         try {
+            if (users.get(user.username()) != null) {
+                throw new DataAccessException("User already exists");
+            }
             String hashedPassword = BCrypt.hashpw(user.password(), BCrypt.gensalt());
             users.put(user.username(), new UserData(user.username(), hashedPassword, user.email()));
         } catch (Exception e) {
