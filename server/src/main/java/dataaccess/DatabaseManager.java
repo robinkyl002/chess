@@ -58,7 +58,6 @@ public class DatabaseManager {
                 INDEX(gameName),
                 INDEX(blackUsername),
                 INDEX(whiteUsername),
-                INDEX(chessGame),
                 CONSTRAINT `fk_game_black_username`
                         FOREIGN KEY (`blackUsername`)
                         REFERENCES user(`username`)
