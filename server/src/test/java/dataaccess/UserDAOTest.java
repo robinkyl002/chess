@@ -1,30 +1,69 @@
 package dataaccess;
 
 import exception.ResponseException;
+import model.UserData;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import passoff.model.TestUser;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserDAOTest {
 
-    private UserDAO getDataAccess(Class<? extends UserDAO> userDAOClass) throws ResponseException {
-//        UserDAO db;
-//        if(userDAOClass.equals(MemoryUserDAO.class)) {
-//            db = new MemoryUserDAO();
-//        }
-//        return db;
-        return null;
+    private UserDAO getDataAccess(Class<? extends UserDAO> userDAOClass) {
+        try {
+            UserDAO db;
+            if (userDAOClass.equals(MemoryUserDAO.class)) {
+                db = new MemoryUserDAO();
+            } else {
+                db = new SQLUserDAO();
+            }
+            db.deleteUsers();
+            return db;
+        } catch (Exception e) {
+            throw new RuntimeException("Could not initialize UserDAO for class");
+        }
+    }
+    private static TestUser existingUser;
+
+    @BeforeEach
+    void setup() {
+        existingUser = new TestUser("username", "password", "email");
     }
 
-    @Test
-    void createUser() {
+    @ParameterizedTest
+    @ValueSource(classes = {MemoryUserDAO.class, SQLUserDAO.class})
+    @DisplayName("Successfully created a user")
+    void createUserSuccessful(Class<?extends UserDAO> dbClass) throws DataAccessException {
+        UserDAO userDAO = getDataAccess(dbClass);
+        assertDoesNotThrow(() -> {
+            userDAO.createUser(new UserData(existingUser.getUsername(),
+                    existingUser.getPassword(), existingUser.getEmail()));});
     }
 
-    @Test
-    void deleteUsers() {
+    @ParameterizedTest
+    @ValueSource(classes = {MemoryUserDAO.class, SQLUserDAO.class})
+    @DisplayName("Successfully deleted all users")
+    void deleteUsers(Class<? extends UserDAO> dbClass) {
+        UserDAO userDAO = getDataAccess(dbClass);
+
+        assertDoesNotThrow(userDAO::deleteUsers);
     }
 
-    @Test
-    void getUser() {
+    @ParameterizedTest
+    @ValueSource(classes = {MemoryUserDAO.class, SQLUserDAO.class})
+    @DisplayName("Successfully retrieved user")
+    void getUser(Class<? extends UserDAO> dbClass) throws DataAccessException {
+        UserDAO userDAO = getDataAccess(dbClass);
+        var userObject = new UserData(existingUser.getUsername(), existingUser.getPassword(), existingUser.getEmail());
+        userDAO.createUser(userObject);
+
+        var user = userDAO.getUser(existingUser.getUsername());
+
+        assertNotNull(user);
+        assertEquals(userObject, user);
     }
 }
