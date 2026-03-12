@@ -46,8 +46,17 @@ class GameDAOTest {
 
     @ParameterizedTest
     @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
+    @DisplayName("Cannot Create Game - Name Is Empty")
+    void createGameFailedGameNameEmpty(Class<? extends GameDAO> gameDAOClass) throws DataAccessException {
+        GameDAO gameDAO = getDataAccess(gameDAOClass);
+
+        assertThrows(DataAccessException.class, () -> gameDAO.createGame(null));
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
     @DisplayName("Retrieve Game Successful")
-    void getGame(Class<? extends GameDAO> gameDAOClass) throws DataAccessException {
+    void getGameSuccessful(Class<? extends GameDAO> gameDAOClass) throws DataAccessException {
         GameDAO gameDAO = getDataAccess(gameDAOClass);
 
         int id = gameDAO.createGame("test");
@@ -55,6 +64,16 @@ class GameDAOTest {
         GameData game = gameDAO.getGame(id);
 
         assertNotNull(game);
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
+    @DisplayName("Get Game - Does not exist")
+    void retrieveGameThatDoesNotExist(Class<? extends GameDAO> gameDAOClass) throws DataAccessException {
+        GameDAO gameDAO = getDataAccess(gameDAOClass);
+
+        GameData game = gameDAO.getGame(1);
+        assertNull(game);
     }
 
     @ParameterizedTest
@@ -71,6 +90,17 @@ class GameDAOTest {
 
     @ParameterizedTest
     @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
+    @DisplayName("List of Games is Empty")
+    void listGamesEmpty(Class<? extends GameDAO> gameDAOClass) throws DataAccessException {
+        GameDAO gameDAO = getDataAccess(gameDAOClass);
+
+        Collection<GameData> gamesList = gameDAO.listGames();
+
+        assertEquals(0, gamesList.size());
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
     @DisplayName("Join Game Successful")
     void joinGame(Class<? extends GameDAO> gameDAOClass) throws DataAccessException {
         GameDAO gameDAO = getDataAccess(gameDAOClass);
@@ -79,6 +109,15 @@ class GameDAOTest {
         assertDoesNotThrow(() -> gameDAO.joinGame(id, existingUser.getUsername(), ChessGame.TeamColor.WHITE));
         GameData updatedGame = gameDAO.getGame(id);
         assertEquals(existingUser.getUsername(), updatedGame.whiteUsername());
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
+    @DisplayName("Game not created")
+    void gameDoesNotExist (Class<? extends GameDAO> gameDAOClass) throws DataAccessException {
+        GameDAO gameDAO = getDataAccess(gameDAOClass);
+
+        assertThrows(DataAccessException.class, () -> gameDAO.joinGame(1, existingUser.getUsername(), ChessGame.TeamColor.WHITE));
     }
 
     @ParameterizedTest
