@@ -13,6 +13,9 @@ public class MemoryGameDAO implements GameDAO {
     @Override
     public int createGame(String gameName) throws DataAccessException {
         try {
+            if (gameName == null) {
+                throw new DataAccessException("GameName cannot be null");
+            }
             var game = new GameData(nextId++, null, null, gameName, new ChessGame());
             games.put(game.gameID(), game);
             return game.gameID();
@@ -44,6 +47,10 @@ public class MemoryGameDAO implements GameDAO {
     public void joinGame(int gameID, String username, ChessGame.TeamColor color) throws DataAccessException {
         try {
             GameData currGame = getGame(gameID);
+
+            if (currGame == null) {
+                throw new DataAccessException("Game does not exist");
+            }
             var newGame = (color == ChessGame.TeamColor.WHITE) ?
                     new GameData(gameID, username, currGame.blackUsername(), currGame.gameName(), currGame.game()) :
                     new GameData(gameID, currGame.whiteUsername(), username, currGame.gameName(), currGame.game());
