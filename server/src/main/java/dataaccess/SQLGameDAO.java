@@ -4,7 +4,6 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.GameData;
-import model.UserData;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -55,8 +54,11 @@ public class SQLGameDAO implements GameDAO {
     }
 
     @Override
-    public void updateGame(int gameID, String username, ChessGame.TeamColor color) throws DataAccessException {
-
+    public void joinGame(int gameID, String username, ChessGame.TeamColor color) throws DataAccessException {
+        var statement = (color == ChessGame.TeamColor.WHITE) ?
+                "UPDATE game SET blackUsername=? WHERE id=?"
+                : "UPDATE game SET whiteUsername=? WHERE id=?";
+        DatabaseManager.executeUpdate(statement, username, gameID);
     }
 
     @Override
