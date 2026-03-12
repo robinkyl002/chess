@@ -41,7 +41,7 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public void updateGame(int gameID, String username, ChessGame.TeamColor color) throws DataAccessException {
+    public void joinGame(int gameID, String username, ChessGame.TeamColor color) throws DataAccessException {
         try {
             GameData currGame = getGame(gameID);
             var newGame = (color == ChessGame.TeamColor.WHITE) ?

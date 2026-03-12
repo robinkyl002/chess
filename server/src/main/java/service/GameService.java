@@ -51,7 +51,7 @@ public class GameService {
                     || (joinGameRequest.playerColor() == ChessGame.TeamColor.BLACK && currGame.blackUsername() != null)) {
                     throw new ResponseException(AlreadyTakenError, errorMessageFromCode(AlreadyTakenError));
             }
-            gameDAO.updateGame(joinGameRequest.gameID(), auth.username(), joinGameRequest.playerColor());
+            gameDAO.joinGame(joinGameRequest.gameID(), auth.username(), joinGameRequest.playerColor());
         } catch (DataAccessException ex) {
             throw new ResponseException(ServerError, errorMessageFromCode(ServerError) + ex.getMessage());
         }
