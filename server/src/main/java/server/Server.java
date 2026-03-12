@@ -15,9 +15,21 @@ public class Server {
     private final GameService gameService;
 
     public Server() {
-        final UserDAO userDAO = new MemoryUserDAO();
-        final AuthDAO authDAO = new MemoryAuthDAO();
-        final GameDAO gameDAO = new MemoryGameDAO();
+        boolean sql = true;
+
+        UserDAO userDAO = new MemoryUserDAO();
+        AuthDAO authDAO = new MemoryAuthDAO();
+        GameDAO gameDAO = new MemoryGameDAO();
+        if (sql) {
+            try {
+                userDAO = new SQLUserDAO();
+                authDAO = new SQLAuthDAO();
+                gameDAO = new SQLGameDAO();
+            } catch (Exception e) {
+                throw new RuntimeException("Could not connect to database" + e.getMessage());
+            }
+        }
+
         userService = new UserService(userDAO, authDAO);
         gameService = new GameService(authDAO, gameDAO);
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
