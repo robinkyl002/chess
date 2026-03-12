@@ -5,6 +5,8 @@ import dataaccess.DataAccessException;
 import dataaccess.UserDAO;
 import exception.ResponseException;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
+
 import static exception.ResponseException.Code.*;
 import static exception.ResponseException.errorMessageFromCode;
 
@@ -37,7 +39,7 @@ public class UserService {
                 throw new ResponseException(UnauthorizedError, errorMessageFromCode(UnauthorizedError));
             }
 
-            if (!existingUser.password().equals(loginRequest.password())) {
+            if (!BCrypt.checkpw(loginRequest.password(), existingUser.password())) {
                 throw new ResponseException(UnauthorizedError, errorMessageFromCode(UnauthorizedError));
             }
             var authData = authDAO.createAuth(loginRequest.username());
