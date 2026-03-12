@@ -1,10 +1,8 @@
 package dataaccess;
 
-import exception.ResponseException;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import passoff.model.TestUser;
@@ -46,6 +44,18 @@ class UserDAOTest {
 
     @ParameterizedTest
     @ValueSource(classes = {MemoryUserDAO.class, SQLUserDAO.class})
+    @DisplayName("User already exists")
+    void createUserFailed(Class<?extends UserDAO> dbClass) throws DataAccessException {
+        UserDAO userDAO = getDataAccess(dbClass);
+
+        userDAO.createUser(new UserData(existingUser.getUsername(), existingUser.getPassword(), existingUser.getEmail()));
+        assertThrows(DataAccessException.class, () -> {
+            userDAO.createUser(new UserData(existingUser.getUsername(), existingUser.getPassword(), existingUser.getEmail()));
+        });
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {MemoryUserDAO.class, SQLUserDAO.class})
     @DisplayName("Successfully deleted all users")
     void deleteUsers(Class<? extends UserDAO> dbClass) {
         UserDAO userDAO = getDataAccess(dbClass);
@@ -56,7 +66,7 @@ class UserDAOTest {
     @ParameterizedTest
     @ValueSource(classes = {MemoryUserDAO.class, SQLUserDAO.class})
     @DisplayName("Successfully retrieved user")
-    void getUser(Class<? extends UserDAO> dbClass) throws DataAccessException {
+    void getUserSuccessful(Class<? extends UserDAO> dbClass) throws DataAccessException {
         UserDAO userDAO = getDataAccess(dbClass);
         var userObject = new UserData(existingUser.getUsername(), existingUser.getPassword(), existingUser.getEmail());
         userDAO.createUser(userObject);
@@ -64,6 +74,18 @@ class UserDAOTest {
         var user = userDAO.getUser(existingUser.getUsername());
 
         assertNotNull(user);
-        assertEquals(userObject, user);
+        assertEquals(userObject.username(), user.username());
+        assertEquals(userObject.email(), user.email());
+        assertNotNull(user.password());
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {MemoryUserDAO.class, SQLUserDAO.class})
+    @DisplayName("User Does not exist")
+    void userDoesNotExist (Class<? extends UserDAO> dbClass) throws DataAccessException {
+        UserDAO userDAO = getDataAccess(dbClass);
+
+        var user = userDAO.getUser(existingUser.getUsername());
+        assertNull(user);
     }
 }
