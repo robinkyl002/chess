@@ -2,7 +2,11 @@ package dataaccess;
 
 import exception.ResponseException;
 import model.AuthData;
+import model.UserData;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.UUID;
 
 public class SQLAuthDAO implements AuthDAO {
@@ -28,6 +32,21 @@ public class SQLAuthDAO implements AuthDAO {
 
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT * FROM auth WHERE authToken=?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, authToken);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        String username = rs.getString("username");
+                        return new AuthData(authToken, username);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(String.format("Unable to retrieve user from database: %s", e.getMessage()), e);
+        }
+
         return null;
     }
 
@@ -38,6 +57,8 @@ public class SQLAuthDAO implements AuthDAO {
 
     @Override
     public void clearAuthData() throws DataAccessException {
+        var statement = "TRUNCATE auth";
+        DatabaseManager.executeUpdate(statement);
 
     }
 
