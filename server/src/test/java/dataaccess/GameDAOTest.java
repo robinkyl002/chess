@@ -1,10 +1,14 @@
 package dataaccess;
 
+import chess.ChessGame;
+import model.GameData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import passoff.model.TestUser;
+
+import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -33,29 +37,48 @@ class GameDAOTest {
     @ParameterizedTest
     @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
     @DisplayName("Create Game Successful")
-    void createGameSuccessful(Class<? extends GameDAO> gameDAOClass) {
+    void createGameSuccessful(Class<? extends GameDAO> gameDAOClass) throws DataAccessException {
         GameDAO gameDAO = getDataAccess(gameDAOClass);
+
+        int id = gameDAO.createGame("New Game");
+        assertEquals(1, id);
     }
 
     @ParameterizedTest
     @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
     @DisplayName("Retrieve Game Successful")
-    void getGame(Class<? extends GameDAO> gameDAOClass) {
+    void getGame(Class<? extends GameDAO> gameDAOClass) throws DataAccessException {
         GameDAO gameDAO = getDataAccess(gameDAOClass);
+
+        int id = gameDAO.createGame("test");
+
+        GameData game = gameDAO.getGame(id);
+
+        assertNotNull(game);
     }
 
     @ParameterizedTest
     @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
     @DisplayName("List Games Successful")
-    void listGames(Class<? extends GameDAO> gameDAOClass) {
+    void listGames(Class<? extends GameDAO> gameDAOClass) throws DataAccessException {
         GameDAO gameDAO = getDataAccess(gameDAOClass);
+        gameDAO.createGame("test");
+
+        Collection<GameData> gamesList = gameDAO.listGames();
+
+        assertNotEquals(0, gamesList.size());
     }
 
     @ParameterizedTest
     @ValueSource(classes = {MemoryGameDAO.class, SQLGameDAO.class})
     @DisplayName("Join Game Successful")
-    void joinGame(Class<? extends GameDAO> gameDAOClass) {
+    void joinGame(Class<? extends GameDAO> gameDAOClass) throws DataAccessException {
         GameDAO gameDAO = getDataAccess(gameDAOClass);
+        int id = gameDAO.createGame("test");
+
+        assertDoesNotThrow(() -> gameDAO.joinGame(id, existingUser.getUsername(), ChessGame.TeamColor.WHITE));
+        GameData updatedGame = gameDAO.getGame(id);
+        assertEquals(existingUser.getUsername(), updatedGame.whiteUsername());
     }
 
     @ParameterizedTest
@@ -63,6 +86,8 @@ class GameDAOTest {
     @DisplayName("Clear Games Successful")
     void clearGameDataSuccessful(Class<? extends GameDAO> gameDAOClass) {
         GameDAO gameDAO = getDataAccess(gameDAOClass);
+
+        assertDoesNotThrow(gameDAO::clearGameData);
 
     }
 }
