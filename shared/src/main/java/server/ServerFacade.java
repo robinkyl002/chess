@@ -12,7 +12,7 @@ public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
     private final String serverUrl;
 
-    ServerFacade(String url) {
+    public ServerFacade(String url) {
         serverUrl = url;
     }
 
