@@ -4,6 +4,8 @@ import server.ServerFacade;
 
 import java.util.Scanner;
 
+import static ui.EscapeSequences.*;
+
 public class ChessClient {
     private final ServerFacade server;
     private State state = State.SIGNEDOUT;
@@ -19,7 +21,7 @@ public class ChessClient {
         Scanner scanner = new Scanner(System.in);
         var result = "";
         while (!result.equals("quit")) {
-//            printPrompt();
+            printPrompt();
             String line = scanner.nextLine();
 
             try {
@@ -32,6 +34,10 @@ public class ChessClient {
             }
         }
         System.out.println();
+    }
+
+    private void printPrompt() {
+        System.out.print("\n" + SET_TEXT_COLOR_BLACK + ">>> " + SET_TEXT_COLOR_GREEN);
     }
 
 }
