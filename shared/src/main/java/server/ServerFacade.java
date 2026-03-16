@@ -2,6 +2,8 @@ package server;
 
 import com.google.gson.Gson;
 import exception.ResponseException;
+import model.UserData;
+import service.*;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -14,6 +16,23 @@ public class ServerFacade {
 
     public ServerFacade(String url) {
         serverUrl = url;
+    }
+
+    public RegisterResult register(RegisterRequest registerRequest) throws ResponseException {
+        var request = buildRequest("POST", "/user", registerRequest);
+        var response = sendRequest(request);
+        return handleResponse(response, RegisterResult.class);
+    }
+
+    public LoginResult login(LoginRequest loginRequest) throws ResponseException{
+        var request = buildRequest("POST", "/session", loginRequest);
+        var response = sendRequest(request);
+        return handleResponse(response, LoginResult.class);
+    }
+
+    public void logout(LogoutRequest logoutRequest) throws ResponseException {
+        var request = buildRequest("DELETE", "/session", logoutRequest);
+        sendRequest(request);
     }
 
     private HttpRequest buildRequest(String method, String path, Object body) {
