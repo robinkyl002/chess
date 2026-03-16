@@ -35,6 +35,23 @@ public class ServerFacade {
         sendRequest(request);
     }
 
+    public CreateGameResult createGame(CreateGameRequest createGameRequest) throws ResponseException{
+        var request = buildRequest("POST", "/game", createGameRequest);
+        var response = sendRequest(request);
+        return handleResponse(response, CreateGameResult.class);
+    }
+
+    public void joinGame(JoinGameRequest joinGameRequest) throws ResponseException {
+        var request = buildRequest("PUT", "/game", joinGameRequest);
+        sendRequest(request);
+    }
+
+    public ListGamesResult listGames() throws ResponseException {
+        var request = buildRequest("GET", "/game", null);
+        var response = sendRequest(request);
+        return handleResponse(response, ListGamesResult.class);
+    }
+
     private HttpRequest buildRequest(String method, String path, Object body) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))
