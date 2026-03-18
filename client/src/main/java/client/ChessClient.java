@@ -2,6 +2,7 @@ package client;
 
 import exception.ResponseException;
 import server.ServerFacade;
+import service.LoginRequest;
 import service.RegisterRequest;
 
 import java.util.Arrays;
@@ -10,16 +11,19 @@ import java.util.Scanner;
 import static ui.EscapeSequences.*;
 
 public class ChessClient {
+    private String username = null;
     private final ServerFacade server;
     private State state = State.SIGNEDOUT;
+    private String authToken;
 
     public ChessClient(String url) {
         server = new ServerFacade(url);
+        authToken = "";
     }
 
     public void run() {
-        System.out.println(" Welcome to the pet store. Sign in to start.");
-//        System.out.print(help());
+        System.out.println(" Welcome to Chess. Sign in to start.");
+        System.out.print(help());
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
@@ -28,9 +32,9 @@ public class ChessClient {
             String line = scanner.nextLine();
 
             try {
-//                result = eval(line);
-//                System.out.print(BLUE + result);
-                System.out.println("working on it");
+                result = eval(line);
+                System.out.print(SET_TEXT_COLOR_BLUE + result);
+//                System.out.println("working on it");
             } catch (Throwable e) {
                 var msg = e.toString();
                 System.out.print(msg);
@@ -40,7 +44,7 @@ public class ChessClient {
     }
 
     private void printPrompt() {
-        System.out.print("\n" + SET_TEXT_COLOR_BLACK + ">>> " + SET_TEXT_COLOR_GREEN);
+        System.out.print("\n" + RESET + ">>> " + SET_TEXT_COLOR_GREEN);
     }
 
     public String eval(String input) {
@@ -64,9 +68,20 @@ public class ChessClient {
     public String register(String ...params) throws ResponseException {
         if (params.length >= 3) {
             var result = server.register(new RegisterRequest(params[0], params[1], params[2]));
-            return "";
+            authToken = result.authToken();
+            username = result.username();
+            return String.format("Logged in as %s", result.username());
         }
         throw new ResponseException(ResponseException.Code.BadRequestError, "Expected: <USERNAME> <PASSWORD> <EMAIL>");
+    }
+
+    public String login(String ...params) throws ResponseException {
+        if (params.length >= 2) {
+            var result = server.login(new LoginRequest(params[0], params[1]));
+            authToken = result.authToken();
+            username = String.format(" - " + result.username());
+        }
+        return null;
     }
 
     public String help() {
