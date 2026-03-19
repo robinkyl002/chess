@@ -2,7 +2,9 @@ package client;
 
 import exception.ResponseException;
 import server.ServerFacade;
+import service.CreateGameRequest;
 import service.LoginRequest;
+import service.LogoutRequest;
 import service.RegisterRequest;
 
 import java.util.Arrays;
@@ -34,7 +36,6 @@ public class ChessClient {
             try {
                 result = eval(line);
                 System.out.print(SET_TEXT_COLOR_BLUE + result);
-//                System.out.println("working on it");
             } catch (Throwable e) {
                 var msg = e.toString();
                 System.out.print(msg);
@@ -54,9 +55,12 @@ public class ChessClient {
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "register" -> register(params);
-                case "login" -> null;
+                case "login" -> login(params);
+                case "create" -> createGame(params);
+                case "join" -> null;
+                case "observe" -> null;
                 case "list" -> null;
-                case "logout" -> null;
+                case "logout" -> logout();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -80,12 +84,29 @@ public class ChessClient {
             var result = server.login(new LoginRequest(params[0], params[1]));
             authToken = result.authToken();
             username = String.format(" - " + result.username());
+            return String.format("Logged in as %s", result.username());
         }
-        return null;
+        throw new ResponseException(ResponseException.Code.BadRequestError, "Expected: <USERNAME> <PASSWORD>");
+    }
+
+    public String logout() throws ResponseException {
+        assertSignedIn();
+        server.logout(new LogoutRequest(authToken));
+        authToken = null;
+        return String.format("%s logged out.", username);
+    }
+
+    public String createGame(String ...params) throws ResponseException {
+        if (params.length > 0) {
+            var createGameRequest = new CreateGameRequest(params[0]);
+            var result = server.createGame(createGameRequest);
+            return String.format("You created a game called %s. The id is %d", params[0], result.gameID());
+        }
+        throw new ResponseException(ResponseException.Code.BadRequestError, "Expected: <NAME>");
     }
 
     public String help() {
-        if (state == State.SIGNEDOUT) {
+        if (authToken == null || authToken.isEmpty()) {
             return """
                     - register <USERNAME> <PASSWORD> <EMAIL> - to create an account
                     - login <USERNAME> <PASSWORD> - to play chess
@@ -95,18 +116,18 @@ public class ChessClient {
         }
         return """
                 - create <NAME> - to start a new game
-                - join <ID> - to join a game
+                - join <ID> [WHITE|BLACK]- a game
+                - observe <ID> - a game
                 - list - to see all existing games
-                - logout
+                - logout - when you are done
                 - quit - playing chess
                 - help - with possible commands
                 """;
     }
 
     private void assertSignedIn() throws ResponseException {
-        if (state == State.SIGNEDOUT) {
+        if (authToken == null || authToken.isEmpty()) {
             throw new ResponseException(ResponseException.Code.UnauthorizedError, "You must sign in");
         }
     }
-
 }
