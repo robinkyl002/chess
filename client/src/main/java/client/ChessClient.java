@@ -2,10 +2,7 @@ package client;
 
 import exception.ResponseException;
 import server.ServerFacade;
-import service.CreateGameRequest;
-import service.LoginRequest;
-import service.LogoutRequest;
-import service.RegisterRequest;
+import service.*;
 
 import java.util.Arrays;
 import java.util.Scanner;
@@ -97,12 +94,21 @@ public class ChessClient {
     }
 
     public String createGame(String ...params) throws ResponseException {
+        assertSignedIn();
         if (params.length > 0) {
-            var createGameRequest = new CreateGameRequest(params[0]);
-            var result = server.createGame(createGameRequest);
-            return String.format("You created a game called %s. The id is %d", params[0], result.gameID());
+            String gameName = String.join(" ", params);
+            var createGameRequest = new CreateGameRequest(gameName);
+            var result = server.createGame(createGameRequest, authToken);
+            return String.format("You created a game called %s. The id is %d", gameName, result.gameID());
         }
         throw new ResponseException(ResponseException.Code.BadRequestError, "Expected: <NAME>");
+    }
+
+    public String listGames() throws ResponseException {
+        assertSignedIn();
+        var gameListResult = server.listGames(authToken);
+
+        return "";
     }
 
     public String help() {
