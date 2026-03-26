@@ -1,6 +1,12 @@
 package service;
 
-import java.util.Collection;
+import com.google.gson.Gson;
 
-public record ListGamesResult (Collection<GameSummary> games) {
+import java.util.ArrayList;
+
+public record ListGamesResult (ArrayList<GameSummary> games) {
+    @Override
+    public String toString() {
+        return new Gson().toJson(this);
+    }
 }
