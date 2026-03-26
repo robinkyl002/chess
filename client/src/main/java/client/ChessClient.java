@@ -1,9 +1,11 @@
 package client;
 
+import com.google.gson.Gson;
 import exception.ResponseException;
 import server.ServerFacade;
 import service.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 
@@ -56,7 +58,7 @@ public class ChessClient {
                 case "create" -> createGame(params);
                 case "join" -> null;
                 case "observe" -> null;
-                case "list" -> null;
+                case "list" -> listGames();
                 case "logout" -> logout();
                 case "quit" -> "quit";
                 default -> help();
@@ -107,8 +109,13 @@ public class ChessClient {
     public String listGames() throws ResponseException {
         assertSignedIn();
         var gameListResult = server.listGames(authToken);
-
-        return "";
+        var result = new StringBuilder();
+        var gson = new Gson();
+        int count = 1;
+        for (GameSummary game : gameListResult.games()) {
+            result.append(String.format("%d. ", count++)).append(gson.toJson(game)).append("\n");
+        }
+        return result.toString();
     }
 
     public String help() {
