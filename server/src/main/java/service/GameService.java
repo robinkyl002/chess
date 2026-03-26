@@ -59,7 +59,7 @@ public class GameService {
     public ListGamesResult listGames() throws ResponseException {
         try {
             Collection<GameData> games = gameDAO.listGames();
-            List<GameSummary> summaries = new ArrayList<GameSummary>();
+            var summaries = new ArrayList<GameSummary>();
             for (var game: games) {
                 summaries.add(new GameSummary(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName()));
             }
