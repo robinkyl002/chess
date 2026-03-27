@@ -7,6 +7,7 @@ import service.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
@@ -16,6 +17,7 @@ public class ChessClient {
     private final ServerFacade server;
     private State state = State.SIGNEDOUT;
     private String authToken;
+    private HashMap<Integer, Integer> gameIDs = new HashMap<Integer, Integer>();
 
     public ChessClient(String url) {
         server = new ServerFacade(url);
@@ -101,6 +103,8 @@ public class ChessClient {
             String gameName = String.join(" ", params);
             var createGameRequest = new CreateGameRequest(gameName);
             var result = server.createGame(createGameRequest, authToken);
+            int nextKey = gameIDs.size();
+            gameIDs.put(nextKey, gameIDs.size());
             return String.format("You created a game called %s. The id is %d", gameName, result.gameID());
         }
         throw new ResponseException(ResponseException.Code.BadRequestError, "Expected: <NAME>");
@@ -111,11 +115,21 @@ public class ChessClient {
         var gameListResult = server.listGames(authToken);
         var result = new StringBuilder();
         var gson = new Gson();
+        if (!gameIDs.isEmpty()) {
+            gameIDs.clear();
+        }
         int count = 1;
         for (GameSummary game : gameListResult.games()) {
             result.append(String.format("%d. ", count++)).append(gson.toJson(game)).append("\n");
+            gameIDs.put(count, game.gameID());
         }
         return result.toString();
+    }
+
+    public String joinGame(int gameID) throws ResponseException {
+        assertSignedIn();
+
+        return "";
     }
 
     public String help() {
