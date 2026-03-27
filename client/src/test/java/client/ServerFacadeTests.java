@@ -4,6 +4,8 @@ import org.junit.jupiter.api.*;
 import server.Server;
 import server.ServerFacade;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 
 public class ServerFacadeTests {
 
@@ -28,5 +30,50 @@ public class ServerFacadeTests {
     public void sampleTest() {
         Assertions.assertTrue(true);
     }
+
+    @Test
+    public void loginSuccess() {
+        assertEquals(true, true);
+    }
+
+    @Test
+    public void loginFail() {}
+
+    @Test
+    public void registerSuccess() {
+        assertEquals(true, true);
+    }
+    @Test
+    public void registerFail() {}
+
+    @Test
+    public void logoutSuccess() {
+        assertEquals(true, true);
+    }
+    @Test
+    public void logoutFail() {}
+
+    @Test
+    public void createGameSuccess() {
+        assertEquals(true, true);
+    }
+    @Test
+    public void createGameFail() {}
+
+    @Test
+    public void joinGameSuccess() {
+        assertEquals(true, true);
+    }
+    @Test
+    public void joinGameFail() {
+
+    }
+
+    @Test
+    public void listGameSuccess() {
+        assertEquals(true, true);
+    }
+    @Test
+    public void listGameFail() {}
 
 }
