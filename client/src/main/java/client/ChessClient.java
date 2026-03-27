@@ -1,11 +1,10 @@
 package client;
 
-import com.google.gson.Gson;
+import chess.ChessGame;
 import exception.ResponseException;
 import server.ServerFacade;
 import service.*;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -58,7 +57,7 @@ public class ChessClient {
                 case "register" -> register(params);
                 case "login" -> login(params);
                 case "create" -> createGame(params);
-                case "join" -> null;
+                case "join" -> joinGame(params);
                 case "observe" -> null;
                 case "list" -> listGames();
                 case "logout" -> logout();
@@ -114,22 +113,39 @@ public class ChessClient {
         assertSignedIn();
         var gameListResult = server.listGames(authToken);
         var result = new StringBuilder();
-        var gson = new Gson();
         if (!gameIDs.isEmpty()) {
             gameIDs.clear();
         }
         int count = 1;
         for (GameSummary game : gameListResult.games()) {
-            result.append(String.format("%d. ", count++)).append(gson.toJson(game)).append("\n");
+            result.append(String.format("%d. ", count++))
+                    .append(String.format("Game Name: %s, Black Team Player: %s, White Team Player: %s",
+                            game.gameName(), game.blackUsername(), game.whiteUsername()))
+                    .append("\n");
             gameIDs.put(count, game.gameID());
         }
         return result.toString();
     }
 
-    public String joinGame(int gameID) throws ResponseException {
+    public String joinGame(String ...params) throws ResponseException {
         assertSignedIn();
+        if (params.length == 2) {
+            ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(params[1]);
+            int userGameID = Integer.parseInt(params[0]);
+            if (userGameID <= 0 || userGameID >= gameIDs.size()) {
+                throw new ResponseException(ResponseException.Code.BadRequestError, String.format("Game does not exist with the id %d", userGameID));
+            }
+            Integer serverGameID =  gameIDs.get(userGameID);
+            if (serverGameID == null) {
+                throw new ResponseException(ResponseException.Code.BadRequestError, "Game does not exist with the id " + userGameID);
+            }
+            var joinGameRequest = new JoinGameRequest(color, serverGameID);
 
-        return "";
+            server.joinGame(joinGameRequest, authToken);
+
+            return "";
+        }
+        throw new ResponseException(ResponseException.Code.BadRequestError, "Expected: <ID> [WHITE|BLACK]");
     }
 
     public String help() {
