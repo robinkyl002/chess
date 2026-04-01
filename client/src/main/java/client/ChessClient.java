@@ -1,6 +1,8 @@
 package client;
 
 import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import exception.ResponseException;
 import model.GameData;
 import server.ServerFacade;
@@ -21,10 +23,13 @@ public class ChessClient {
     private String authToken;
     private HashMap<Integer, Integer> gameIDs = new HashMap<>();
     private final static int SQUARES_ON_SIDE = 8;
-    private final static int BOARD_WIDTH = 10;
-//    private final static int BOARD_HEIGHT = 8;
     private final static String[] HORIZONTAL_HEADERS = {"a", "b", "c", "d", "e", "f", "g", "h"};
     private final static String[] VERTICAL_HEADERS = {"1", "2", "3", "4", "5", "6", "7", "8"};
+
+    private enum SpaceColor {
+        WHITE,
+        BLACK,
+    }
 
     public ChessClient(String url) {
         server = new ServerFacade(url);
@@ -152,7 +157,7 @@ public class ChessClient {
 
             server.joinGame(joinGameRequest, authToken);
 
-            return drawBoard(new GameData(userGameID, "", "", "game", new ChessGame()));
+            return drawBoard(new GameData(userGameID, "", "", "game", new ChessGame()), color);
         }
         throw new ResponseException(ResponseException.Code.BadRequestError, "Expected: <ID> [WHITE|BLACK]");
     }
@@ -183,13 +188,47 @@ public class ChessClient {
         }
     }
 
-    public static String drawBoard (GameData gameData) throws ResponseException {
-        var gameState = gameData.game();
-        var gameBoard = gameState.getBoard();
+    public static String drawBoard (GameData gameData, ChessGame.TeamColor color) throws ResponseException {
+        var gameBoard = gameData.game().getBoard();
+        //var gameBoard = gameState.getBoard();
 
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+        out.print(ERASE_SCREEN);
         // TODO: Add a way to change increment for border based on which color player
-        drawHorizontalBorder(out, 1);
+        int increment = (color == ChessGame.TeamColor.WHITE) ? 1 : -1;
+        drawHorizontalBorder(out, increment);
+        int spaceNumber = 1;
+
+        for (int i = 0; i < SQUARES_ON_SIDE; i++) {
+            setBorderColors(out);
+            out.print(" " + VERTICAL_HEADERS[i] + " ");
+            for (int j = 0; j < SQUARES_ON_SIDE; j++) {
+                var piece = gameBoard.getPiece(new ChessPosition(i + 1, j + 1));
+
+                if (spaceNumber % 2 == 0) {
+                    out.print(SET_BG_COLOR_BLACK);
+                } else {
+                    out.print(SET_BG_COLOR_WHITE);
+                }
+                if (piece == null) {
+                    out.print(EMPTY);
+                } else {
+                    switch (piece.getPieceType()) {
+                        case KING -> out.print(WHITE_KING);
+                        case QUEEN -> out.print(WHITE_QUEEN);
+                        case ROOK -> out.print(WHITE_ROOK);
+                        case KNIGHT -> out.print(WHITE_KNIGHT);
+                        case BISHOP -> out.print(WHITE_BISHOP);
+                        case PAWN -> out.print(WHITE_PAWN);
+                    }
+                }
+                spaceNumber++;
+            }
+            setBorderColors(out);
+            out.print(" " + VERTICAL_HEADERS[i] + " ");
+            out.print(RESET);
+            out.println();
+        }
 //        String board = SET_BG_COLOR_LIGHT_GREY;
 //        StringBuilder result = new StringBuilder();
 //        result.append(SET_BG_COLOR_LIGHT_GREY);
@@ -203,20 +242,37 @@ public class ChessClient {
 //        result.append(RESET);
 //        String board = result.toString();
         // return board;
-        drawHorizontalBorder(out, 1);
+        drawHorizontalBorder(out, increment);
         return "";
     }
 
     private static void drawHorizontalBorder(PrintStream out, int increment) {
-        out.print(SET_BG_COLOR_LIGHT_GREY);
-        out.print(SET_TEXT_COLOR_BLACK);
+        setBorderColors(out);
         out.print(EMPTY);
 
-        for (int i = 0; i < SQUARES_ON_SIDE; i += increment) {
-            out.print(" " + HORIZONTAL_HEADERS[i] + " ");
+        if (increment == 1) {
+            for (int i = 0; i < SQUARES_ON_SIDE; i += increment) {
+                out.print(" " + HORIZONTAL_HEADERS[i] + " ");
+            }
+        } else {
+            for (int i = SQUARES_ON_SIDE - 1; i >= 0; i += increment) {
+                out.print(" " + HORIZONTAL_HEADERS[i] + " ");
+            }
         }
+//        int startPoint = (increment == 1) ? 0 : SQUARES_ON_SIDE;
+//        int endPoint = (increment == 1) ? SQUARES_ON_SIDE : 0;
+//
+//        for (int i = startPoint; i < endPoint; i += increment) {
+//            out.print(" " + HORIZONTAL_HEADERS[i] + " ");
+//        }
         out.print(EMPTY);
         out.print(RESET_BG_COLOR);
         out.print(RESET_TEXT_COLOR);
+        out.println();
+    }
+
+    private static void setBorderColors(PrintStream out) {
+        out.print(SET_BG_COLOR_LIGHT_GREY);
+        out.print(SET_TEXT_COLOR_BLACK);
     }
 }
