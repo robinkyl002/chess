@@ -2,9 +2,12 @@ package client;
 
 import chess.ChessGame;
 import exception.ResponseException;
+import model.GameData;
 import server.ServerFacade;
 import service.*;
 
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -16,7 +19,12 @@ public class ChessClient {
     private final ServerFacade server;
     private State state = State.SIGNEDOUT;
     private String authToken;
-    private HashMap<Integer, Integer> gameIDs = new HashMap<Integer, Integer>();
+    private HashMap<Integer, Integer> gameIDs = new HashMap<>();
+    private final static int SQUARES_ON_SIDE = 8;
+    private final static int BOARD_WIDTH = 10;
+//    private final static int BOARD_HEIGHT = 8;
+    private final static String[] HORIZONTAL_HEADERS = {"a", "b", "c", "d", "e", "f", "g", "h"};
+    private final static String[] VERTICAL_HEADERS = {"1", "2", "3", "4", "5", "6", "7", "8"};
 
     public ChessClient(String url) {
         server = new ServerFacade(url);
@@ -102,9 +110,9 @@ public class ChessClient {
             String gameName = String.join(" ", params);
             var createGameRequest = new CreateGameRequest(gameName);
             var result = server.createGame(createGameRequest, authToken);
-            int nextKey = gameIDs.size();
-            gameIDs.put(nextKey, gameIDs.size());
-            return String.format("You created a game called %s. The id is %d", gameName, result.gameID());
+            int nextKey = gameIDs.size() + 1;
+            gameIDs.put(nextKey, result.gameID());
+            return String.format("You created a game called %s. The id is %d", gameName, nextKey);
         }
         throw new ResponseException(ResponseException.Code.BadRequestError, "Expected: <NAME>");
     }
@@ -118,11 +126,12 @@ public class ChessClient {
         }
         int count = 1;
         for (GameSummary game : gameListResult.games()) {
-            result.append(String.format("%d. ", count++))
+            result.append(String.format("%d. ", count))
                     .append(String.format("Game Name: %s, Black Team Player: %s, White Team Player: %s",
                             game.gameName(), game.blackUsername(), game.whiteUsername()))
                     .append("\n");
             gameIDs.put(count, game.gameID());
+            count++;
         }
         return result.toString();
     }
@@ -130,9 +139,9 @@ public class ChessClient {
     public String joinGame(String ...params) throws ResponseException {
         assertSignedIn();
         if (params.length == 2) {
-            ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(params[1]);
+            ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(params[1].toUpperCase());
             int userGameID = Integer.parseInt(params[0]);
-            if (userGameID <= 0 || userGameID >= gameIDs.size()) {
+            if (userGameID < 0 || userGameID > gameIDs.size()) {
                 throw new ResponseException(ResponseException.Code.BadRequestError, String.format("Game does not exist with the id %d", userGameID));
             }
             Integer serverGameID =  gameIDs.get(userGameID);
@@ -143,7 +152,7 @@ public class ChessClient {
 
             server.joinGame(joinGameRequest, authToken);
 
-            return "";
+            return drawBoard(new GameData(userGameID, "", "", "game", new ChessGame()));
         }
         throw new ResponseException(ResponseException.Code.BadRequestError, "Expected: <ID> [WHITE|BLACK]");
     }
@@ -172,5 +181,42 @@ public class ChessClient {
         if (authToken == null || authToken.isEmpty()) {
             throw new ResponseException(ResponseException.Code.UnauthorizedError, "You must sign in");
         }
+    }
+
+    public static String drawBoard (GameData gameData) throws ResponseException {
+        var gameState = gameData.game();
+        var gameBoard = gameState.getBoard();
+
+        var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+        // TODO: Add a way to change increment for border based on which color player
+        drawHorizontalBorder(out, 1);
+//        String board = SET_BG_COLOR_LIGHT_GREY;
+//        StringBuilder result = new StringBuilder();
+//        result.append(SET_BG_COLOR_LIGHT_GREY);
+//        for (int i = 0; i < 10; i++) {
+//            result.append(EMPTY);
+//            // board = board + " ";
+//            System.out.print(SET_BG_COLOR_LIGHT_GREY);
+//        }
+//
+//        System.out.print(SET_BG_COLOR_LIGHT_GREY);
+//        result.append(RESET);
+//        String board = result.toString();
+        // return board;
+        drawHorizontalBorder(out, 1);
+        return "";
+    }
+
+    private static void drawHorizontalBorder(PrintStream out, int increment) {
+        out.print(SET_BG_COLOR_LIGHT_GREY);
+        out.print(SET_TEXT_COLOR_BLACK);
+        out.print(EMPTY);
+
+        for (int i = 0; i < SQUARES_ON_SIDE; i += increment) {
+            out.print(" " + HORIZONTAL_HEADERS[i] + " ");
+        }
+        out.print(EMPTY);
+        out.print(RESET_BG_COLOR);
+        out.print(RESET_TEXT_COLOR);
     }
 }
