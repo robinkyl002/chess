@@ -15,7 +15,7 @@ import static ui.EscapeSequences.*;
 public class ChessBoardRenderer {
     private final static int SQUARES_ON_SIDE = 8;
     private final static String[] HORIZONTAL_HEADERS = {"a", "b", "c", "d", "e", "f", "g", "h"};
-    private final static String[] VERTICAL_HEADERS = {"1", "2", "3", "4", "5", "6", "7", "8"};
+    private final static String[] VERTICAL_HEADERS = {"8", "7", "6", "5", "4", "3", "2", "1"};
 
     public static void drawBoard (GameData gameData, ChessGame.TeamColor color) {
         var gameBoard = gameData.game().getBoard();
@@ -62,7 +62,7 @@ public class ChessBoardRenderer {
         for (int j = startColumn; j != endColumn; j += step) {
             var piece = board.getPiece(new ChessPosition(currRow + 1, j + 1));
 
-            out.print(((currRow + j) % 2 == 0) ? SET_BG_COLOR_BLACK : SET_BG_COLOR_WHITE);
+            out.print(((currRow + j) % 2 == 0) ? SET_BG_COLOR_WHITE : SET_BG_COLOR_BLACK);
 
             if (piece == null) {
                 out.print(EMPTY);
