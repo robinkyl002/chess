@@ -222,51 +222,7 @@ public class ChessClient {
                         out.print(SET_TEXT_COLOR_BLUE);
                     }
 
-                    switch (piece.getPieceType()) {
-                        case KING -> {
-                            if ((color == ChessGame.TeamColor.WHITE)) {
-                                out.print(WHITE_KING);
-                            } else {
-                                out.print(BLACK_KING);
-                            }
-                        }
-                        case QUEEN -> {
-                            if ((color == ChessGame.TeamColor.WHITE)) {
-                                out.print(WHITE_QUEEN);
-                            } else {
-                                out.print(BLACK_QUEEN);
-                            }
-                        }
-                        case ROOK -> {
-                            if ((color == ChessGame.TeamColor.WHITE)) {
-                                out.print(WHITE_ROOK);
-                            } else {
-                                out.print(BLACK_ROOK);
-                            }
-                        }
-                        case KNIGHT -> {
-                            if ((color == ChessGame.TeamColor.WHITE)) {
-                                out.print(WHITE_KNIGHT);
-                            }
-                            else {
-                                out.print(BLACK_KNIGHT);
-                            }
-                        }
-                        case BISHOP -> {
-                            if ((color == ChessGame.TeamColor.WHITE)) {
-                                out.print(WHITE_BISHOP);
-                            } else {
-                                out.print(BLACK_BISHOP);
-                            }
-                        }
-                        case PAWN -> {
-                            if ((color == ChessGame.TeamColor.WHITE)) {
-                                out.print(WHITE_PAWN);
-                            } else {
-                                out.print(BLACK_PAWN);
-                            }
-                        }
-                    }
+                    out.print(getPieceSymbol(piece));
                 }
                 spaceNumber++;
             }
@@ -302,5 +258,16 @@ public class ChessClient {
     private static void setBorderColors(PrintStream out) {
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(SET_TEXT_COLOR_BLACK);
+    }
+
+    private static String getPieceSymbol(ChessPiece piece) {
+        return switch (piece.getPieceType()) {
+            case KING -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_KING : BLACK_KING;
+            case QUEEN -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_QUEEN : BLACK_QUEEN;
+            case ROOK -> piece.getTeamColor()  == ChessGame.TeamColor.WHITE ? WHITE_ROOK : BLACK_ROOK;
+            case KNIGHT -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_KNIGHT : BLACK_KNIGHT;
+            case BISHOP -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_BISHOP : BLACK_BISHOP;
+            case PAWN -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_PAWN : BLACK_PAWN;
+        };
     }
 }
