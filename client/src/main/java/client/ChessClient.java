@@ -165,6 +165,13 @@ public class ChessClient {
                     throw new ResponseException(ResponseException.Code.BadRequestError, "Game does not exist with the id " + userGameID);
                 }
 
+                Integer serverGameID = gameIDs.get(userGameID);
+                if (serverGameID == null) {
+                    throw new ResponseException(ResponseException.Code.BadRequestError, "Game does not exist with the id " + userGameID);
+                }
+
+                ChessBoardRenderer.drawBoard(new GameData(userGameID, "", "", "game", new ChessGame()),
+                        ChessGame.TeamColor.WHITE);
                 return String.format("Now observing game with id %d", userGameID);
             } catch (IllegalArgumentException e) {
                 throw new ResponseException(ResponseException.Code.BadRequestError, "Expected: <ID>");
