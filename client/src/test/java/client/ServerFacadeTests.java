@@ -1,13 +1,11 @@
 package client;
 
+import chess.ChessGame;
 import exception.ResponseException;
 import org.junit.jupiter.api.*;
 import server.Server;
 import server.ServerFacade;
-import service.CreateGameRequest;
-import service.LoginRequest;
-import service.LogoutRequest;
-import service.RegisterRequest;
+import service.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -106,24 +104,50 @@ public class ServerFacadeTests {
 
     @Test
     @DisplayName("Create Game Failed - Empty name")
-    public void createGameFail() {}
+    public void createGameFail() throws ResponseException {
+        var registerResult = facade.register(new RegisterRequest("user", "pass", "email"));
 
-    @Test
-    @DisplayName("Join Game Successful")
-    public void joinGameSuccess() {
-        assertEquals(true, true);
+        Exception ex = assertThrows(ResponseException.class,
+                () -> facade.createGame(new CreateGameRequest(""), registerResult.authToken()));
+        Assertions.assertEquals("Error: bad request", ex.getMessage());
     }
 
     @Test
-    @DisplayName("Join Game Failed")
-    public void joinGameFail() {
+    @DisplayName("Join Game Successful")
+    public void joinGameSuccess() throws ResponseException {
+        var registerResult = facade.register(new RegisterRequest("user", "pass", "email"));
+        var createGameResult = facade.createGame(new CreateGameRequest("new game"), registerResult.authToken());
 
+
+        assertDoesNotThrow(() -> facade.joinGame(new JoinGameRequest(ChessGame.TeamColor.WHITE, createGameResult.gameID()),
+                registerResult.authToken()));
+    }
+
+    @Test
+    @DisplayName("Join Game Failed - Spot taken")
+    public void joinGameFail() throws ResponseException {
+        var registerResult = facade.register(new RegisterRequest("user", "pass", "email"));
+        var otherRegisterResult = facade.register(new RegisterRequest("competitor", "pass", "email"));
+        var createGameResult = facade.createGame(new CreateGameRequest("new game"), registerResult.authToken());
+
+        facade.joinGame(new JoinGameRequest(ChessGame.TeamColor.WHITE, createGameResult.gameID()), registerResult.authToken());
+
+        Exception ex = assertThrows(ResponseException.class,
+                () -> facade.joinGame(new JoinGameRequest(ChessGame.TeamColor.WHITE, createGameResult.gameID()),
+                otherRegisterResult.authToken()));
+        Assertions.assertEquals("Error: already taken", ex.getMessage());
     }
 
     @Test
     @DisplayName("List Games Successful")
-    public void listGameSuccess() {
+    public void listGameSuccess() throws ResponseException {
+        var registerResult = facade.register(new RegisterRequest("user", "pass", "email"));
+        var createGameResult = facade.createGame(new CreateGameRequest("new game"), registerResult.authToken());
 
+        var listGamesResult = facade.listGames(registerResult.authToken());
+        Assertions.assertNotNull(listGamesResult);
+        assertEquals(createGameResult.gameID(), listGamesResult.games().getFirst().gameID());
+        assertEquals(1, listGamesResult.games().size());
     }
 
     @Test
