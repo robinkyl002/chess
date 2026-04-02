@@ -35,12 +35,6 @@ public class ServerFacadeTests {
         server.stop();
     }
 
-
-    @Test
-    public void sampleTest() {
-        Assertions.assertTrue(true);
-    }
-
     @Test
     @DisplayName("Login Successful")
     public void loginSuccess() throws ResponseException {
@@ -95,7 +89,7 @@ public class ServerFacadeTests {
 
         facade.logout(new LogoutRequest(registerResult.authToken()));
 
-        Exception ex = assertThrows(ResponseException.class, () -> facade.logout(new LogoutRequest(registerResult.authToken())));
+        Exception ex = assertThrows(ResponseException.class, () -> facade.logout(new LogoutRequest(" ")));
         Assertions.assertEquals("Error: unauthorized", ex.getMessage());
     }
 
@@ -131,4 +125,9 @@ public class ServerFacadeTests {
     @DisplayName("List Games Failed - Empty list")
     public void listGameFail() {}
 
+    @Test
+    @DisplayName("Clear DB Successful")
+    public void clearDBSuccess() {
+        assertDoesNotThrow(() -> facade.clear());
+    }
 }
