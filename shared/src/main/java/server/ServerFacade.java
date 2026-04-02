@@ -31,7 +31,8 @@ public class ServerFacade {
 
     public void logout(LogoutRequest logoutRequest) throws ResponseException {
         var request = buildRequest("DELETE", "/session", null, logoutRequest.authToken());
-        sendRequest(request);
+        var response = sendRequest(request);
+        handleResponse(response, null);
     }
 
     public CreateGameResult createGame(CreateGameRequest createGameRequest, String authToken) throws ResponseException{
@@ -42,7 +43,8 @@ public class ServerFacade {
 
     public void joinGame(JoinGameRequest joinGameRequest, String authToken) throws ResponseException {
         var request = buildRequest("PUT", "/game", joinGameRequest, authToken);
-        sendRequest(request);
+        var response = sendRequest(request);
+        handleResponse(response, null);
     }
 
     public ListGamesResult listGames(String authToken) throws ResponseException {
