@@ -194,13 +194,18 @@ public class ChessClient {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         out.print(ERASE_SCREEN);
         int increment = (color == ChessGame.TeamColor.WHITE) ? 1 : -1;
+        int startRow = (color == ChessGame.TeamColor.WHITE) ? 0 : SQUARES_ON_SIDE - 1;
+        int endRow = (color == ChessGame.TeamColor.WHITE) ? SQUARES_ON_SIDE : -1;
         drawHorizontalBorder(out, increment);
         int spaceNumber = 1;
 
-        for (int i = 0; i < SQUARES_ON_SIDE; i++) {
+        for (int i = startRow; i != endRow; i += increment) {
             setBorderColors(out);
             out.print(" " + VERTICAL_HEADERS[i] + " ");
-            for (int j = 0; j < SQUARES_ON_SIDE; j++) {
+
+            int startColumn = (color == ChessGame.TeamColor.WHITE) ? 0 : SQUARES_ON_SIDE - 1;
+            int endColumn = (color == ChessGame.TeamColor.WHITE) ? SQUARES_ON_SIDE : -1;
+            for (int j = startColumn; j != endColumn; j += increment) {
                 var piece = gameBoard.getPiece(new ChessPosition(i + 1, j + 1));
 
                 if (spaceNumber % 2 == 0) {
@@ -271,19 +276,6 @@ public class ChessClient {
             out.print(RESET);
             out.println();
         }
-//        String board = SET_BG_COLOR_LIGHT_GREY;
-//        StringBuilder result = new StringBuilder();
-//        result.append(SET_BG_COLOR_LIGHT_GREY);
-//        for (int i = 0; i < 10; i++) {
-//            result.append(EMPTY);
-//            // board = board + " ";
-//            System.out.print(SET_BG_COLOR_LIGHT_GREY);
-//        }
-//
-//        System.out.print(SET_BG_COLOR_LIGHT_GREY);
-//        result.append(RESET);
-//        String board = result.toString();
-        // return board;
         drawHorizontalBorder(out, increment);
         return "";
     }
@@ -301,12 +293,6 @@ public class ChessClient {
                 out.print(" " + HORIZONTAL_HEADERS[i] + " ");
             }
         }
-//        int startPoint = (increment == 1) ? 0 : SQUARES_ON_SIDE;
-//        int endPoint = (increment == 1) ? SQUARES_ON_SIDE : 0;
-//
-//        for (int i = startPoint; i < endPoint; i += increment) {
-//            out.print(" " + HORIZONTAL_HEADERS[i] + " ");
-//        }
         out.print(EMPTY);
         out.print(RESET_BG_COLOR);
         out.print(RESET_TEXT_COLOR);
