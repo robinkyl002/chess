@@ -59,7 +59,7 @@ public class ChessClient {
                 case "login" -> login(params);
                 case "create" -> createGame(params);
                 case "join" -> joinGame(params);
-                case "observe" -> null;
+                case "observe" -> observeGame(params);
                 case "list" -> listGames();
                 case "logout" -> logout();
                 case "quit" -> "quit";
@@ -132,8 +132,8 @@ public class ChessClient {
     public String joinGame(String... params) throws ResponseException {
         assertSignedIn();
         if (params.length == 2) {
-            ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(params[1].toUpperCase());
             try {
+                ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(params[1].toUpperCase());
                 int userGameID = Integer.parseInt(params[0]);
                 if (userGameID < 0 || userGameID > gameIDs.size()) {
                     throw new ResponseException(ResponseException.Code.BadRequestError, String.format("Game does not exist with the id %d", userGameID));
@@ -146,12 +146,30 @@ public class ChessClient {
 
                 server.joinGame(joinGameRequest, authToken);
 
-                return ChessBoardRenderer.drawBoard(new GameData(userGameID, "", "", "game", new ChessGame()), color);
-            } catch (Exception ex) {
+                ChessBoardRenderer.drawBoard(new GameData(userGameID, "", "", "game", new ChessGame()), color);
+                return String.format("Successfully joined game with id %d as color %s\n", userGameID, color.name());
+            } catch (IllegalArgumentException ex) {
                 throw new ResponseException(ResponseException.Code.BadRequestError, "Expected: <ID> [WHITE|BLACK]");
             }
         }
         throw new ResponseException(ResponseException.Code.BadRequestError, "Expected: <ID> [WHITE|BLACK]");
+    }
+
+    public String observeGame(String... params) throws ResponseException {
+        assertSignedIn();
+        if (params.length == 1) {
+            try {
+                int userGameID = Integer.parseInt(params[0]);
+                if (userGameID < 0 || userGameID > gameIDs.size()) {
+                    throw new ResponseException(ResponseException.Code.BadRequestError, "Game does not exist with the id " + userGameID);
+                }
+
+                return String.format("Now observing game with id %d", userGameID);
+            } catch (IllegalArgumentException e) {
+                throw new ResponseException(ResponseException.Code.BadRequestError, "Expected: <ID>");
+            }
+        }
+        throw new ResponseException(ResponseException.Code.BadRequestError, "Expected: <ID>");
     }
 
     public String help() {
@@ -176,7 +194,7 @@ public class ChessClient {
 
     private void assertSignedIn() throws ResponseException {
         if (authToken == null || authToken.isEmpty()) {
-            throw new ResponseException(ResponseException.Code.UnauthorizedError, "You must sign in");
+            throw new ResponseException(ResponseException.Code.UnauthorizedError, "You must be signed in to perform this action.");
         }
     }
 }
