@@ -136,7 +136,8 @@ public class ChessClient {
                 ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(params[1].toUpperCase());
                 int userGameID = Integer.parseInt(params[0]);
                 if (userGameID < 0 || userGameID > gameIDs.size()) {
-                    throw new ResponseException(ResponseException.Code.BadRequestError, String.format("Game does not exist with the id %d", userGameID));
+                    throw new ResponseException(ResponseException.Code.BadRequestError,
+                            String.format("Game does not exist with the id %d", userGameID));
                 }
                 Integer serverGameID = gameIDs.get(userGameID);
                 if (serverGameID == null) {
