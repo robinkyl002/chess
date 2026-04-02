@@ -1,8 +1,12 @@
 package client;
 
+import exception.ResponseException;
 import org.junit.jupiter.api.*;
 import server.Server;
 import server.ServerFacade;
+import service.LoginRequest;
+import service.LogoutRequest;
+import service.RegisterRequest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,6 +24,12 @@ public class ServerFacadeTests {
         facade = new ServerFacade(String.format("http://localhost:%d", port));
     }
 
+    @BeforeEach
+    void setup() throws ResponseException {
+
+        facade.clear();
+    }
+
     @AfterAll
     static void stopServer() {
         server.stop();
@@ -33,33 +43,61 @@ public class ServerFacadeTests {
 
     @Test
     @DisplayName("Login Successful")
-    public void loginSuccess() {
-        assertEquals(true, true);
+    public void loginSuccess() throws ResponseException {
+        facade.register(new RegisterRequest("user", "pass", "email"));
+
+        var loginResult = facade.login(new LoginRequest("user", "pass"));
+        Assertions.assertNotNull(loginResult);
+        Assertions.assertEquals("user", loginResult.username());
+        Assertions.assertNotNull(loginResult.authToken());
     }
 
     @Test
     @DisplayName("Login Failed - No Existing User")
-    public void loginFail() {}
+    public void loginFail() {
+        Exception ex = assertThrows(ResponseException.class, () -> facade.login(new LoginRequest("user", "pass")));
+        Assertions.assertEquals("Error: unauthorized",  ex.getMessage());
+    }
 
     @Test
     @DisplayName("Register Successful")
-    public void registerSuccess() {
-        assertEquals(true, true);
+    public void registerSuccess() throws ResponseException {
+        var registerResult = facade.register(new RegisterRequest("user", "pass", "email"));
+
+        Assertions.assertNotNull(registerResult);
+        Assertions.assertEquals("user", registerResult.username());
+        Assertions.assertNotNull(registerResult.authToken());
     }
 
     @Test
     @DisplayName("Register Failed - Already Taken Error")
-    public void registerFail() {}
+    public void registerFail() throws ResponseException {
+        facade.register(new RegisterRequest("user", "pass", "email"));
+
+        Exception ex = assertThrows(ResponseException.class,
+                () -> facade.register(new RegisterRequest("user", "pass", "email")));
+
+        Assertions.assertEquals("Error: already taken", ex.getMessage());
+    }
 
     @Test
     @DisplayName("Logout Successful")
-    public void logoutSuccess() {
-        assertEquals(true, true);
+    public void logoutSuccess() throws ResponseException {
+        var registerResult = facade.register(new RegisterRequest("user", "pass", "email"));
+
+        assertDoesNotThrow(() -> facade.logout(new LogoutRequest(registerResult.authToken())));
     }
 
     @Test
     @DisplayName("Logout Failed - No existing auth token")
-    public void logoutFail() {}
+    public void logoutFail() throws ResponseException {
+        var registerResult = facade.register(new RegisterRequest("user", "pass", "email"));
+
+        facade.logout(new LogoutRequest(registerResult.authToken()));
+
+        Exception ex = assertThrows(ResponseException.class, () -> facade.logout(new LogoutRequest(registerResult.authToken())));
+        Assertions.assertEquals("Error: unauthorized", ex.getMessage());
+    }
 
     @Test
     @DisplayName("Create Game Successful")
