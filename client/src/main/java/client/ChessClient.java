@@ -1,17 +1,12 @@
 package client;
 
-import chess.ChessBoard;
 import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
 import exception.ResponseException;
 import model.GameData;
 import server.ServerFacade;
 import service.*;
 import ui.ChessBoardRenderer;
 
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
