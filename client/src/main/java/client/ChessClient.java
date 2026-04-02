@@ -190,11 +190,9 @@ public class ChessClient {
 
     public static String drawBoard (GameData gameData, ChessGame.TeamColor color) throws ResponseException {
         var gameBoard = gameData.game().getBoard();
-        //var gameBoard = gameState.getBoard();
 
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         out.print(ERASE_SCREEN);
-        // TODO: Add a way to change increment for border based on which color player
         int increment = (color == ChessGame.TeamColor.WHITE) ? 1 : -1;
         drawHorizontalBorder(out, increment);
         int spaceNumber = 1;
@@ -213,17 +211,61 @@ public class ChessClient {
                 if (piece == null) {
                     out.print(EMPTY);
                 } else {
+                    if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                        out.print(SET_TEXT_COLOR_RED);
+                    } else {
+                        out.print(SET_TEXT_COLOR_BLUE);
+                    }
+
                     switch (piece.getPieceType()) {
-                        case KING -> out.print(WHITE_KING);
-                        case QUEEN -> out.print(WHITE_QUEEN);
-                        case ROOK -> out.print(WHITE_ROOK);
-                        case KNIGHT -> out.print(WHITE_KNIGHT);
-                        case BISHOP -> out.print(WHITE_BISHOP);
-                        case PAWN -> out.print(WHITE_PAWN);
+                        case KING -> {
+                            if ((color == ChessGame.TeamColor.WHITE)) {
+                                out.print(WHITE_KING);
+                            } else {
+                                out.print(BLACK_KING);
+                            }
+                        }
+                        case QUEEN -> {
+                            if ((color == ChessGame.TeamColor.WHITE)) {
+                                out.print(WHITE_QUEEN);
+                            } else {
+                                out.print(BLACK_QUEEN);
+                            }
+                        }
+                        case ROOK -> {
+                            if ((color == ChessGame.TeamColor.WHITE)) {
+                                out.print(WHITE_ROOK);
+                            } else {
+                                out.print(BLACK_ROOK);
+                            }
+                        }
+                        case KNIGHT -> {
+                            if ((color == ChessGame.TeamColor.WHITE)) {
+                                out.print(WHITE_KNIGHT);
+                            }
+                            else {
+                                out.print(BLACK_KNIGHT);
+                            }
+                        }
+                        case BISHOP -> {
+                            if ((color == ChessGame.TeamColor.WHITE)) {
+                                out.print(WHITE_BISHOP);
+                            } else {
+                                out.print(BLACK_BISHOP);
+                            }
+                        }
+                        case PAWN -> {
+                            if ((color == ChessGame.TeamColor.WHITE)) {
+                                out.print(WHITE_PAWN);
+                            } else {
+                                out.print(BLACK_PAWN);
+                            }
+                        }
                     }
                 }
                 spaceNumber++;
             }
+            spaceNumber++;
             setBorderColors(out);
             out.print(" " + VERTICAL_HEADERS[i] + " ");
             out.print(RESET);
