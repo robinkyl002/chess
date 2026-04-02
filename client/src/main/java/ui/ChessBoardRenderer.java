@@ -17,7 +17,7 @@ public class ChessBoardRenderer {
     private final static String[] HORIZONTAL_HEADERS = {"a", "b", "c", "d", "e", "f", "g", "h"};
     private final static String[] VERTICAL_HEADERS = {"1", "2", "3", "4", "5", "6", "7", "8"};
 
-    public static String drawBoard (GameData gameData, ChessGame.TeamColor color) {
+    public static void drawBoard (GameData gameData, ChessGame.TeamColor color) {
         var gameBoard = gameData.game().getBoard();
 
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
@@ -31,7 +31,6 @@ public class ChessBoardRenderer {
             drawRow(out, i, gameBoard, color);
         }
         drawHorizontalBorder(out, increment);
-        return String.format("Successfully joined game with id %d as color %s\n", gameData.gameID(), color.name());
     }
 
     private static void drawHorizontalBorder(PrintStream out, int increment) {
