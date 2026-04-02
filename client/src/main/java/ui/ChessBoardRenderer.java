@@ -31,7 +31,7 @@ public class ChessBoardRenderer {
             drawRow(out, i, gameBoard, color);
         }
         drawHorizontalBorder(out, increment);
-        return "";
+        return String.format("Successfully joined game with id %d as color %s\n", gameData.gameID(), color.name());
     }
 
     private static void drawHorizontalBorder(PrintStream out, int increment) {
