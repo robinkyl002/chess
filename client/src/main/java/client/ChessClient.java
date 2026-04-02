@@ -133,19 +133,23 @@ public class ChessClient {
         assertSignedIn();
         if (params.length == 2) {
             ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(params[1].toUpperCase());
-            int userGameID = Integer.parseInt(params[0]);
-            if (userGameID < 0 || userGameID > gameIDs.size()) {
-                throw new ResponseException(ResponseException.Code.BadRequestError, String.format("Game does not exist with the id %d", userGameID));
-            }
-            Integer serverGameID = gameIDs.get(userGameID);
-            if (serverGameID == null) {
-                throw new ResponseException(ResponseException.Code.BadRequestError, "Game does not exist with the id " + userGameID);
-            }
-            var joinGameRequest = new JoinGameRequest(color, serverGameID);
+            try {
+                int userGameID = Integer.parseInt(params[0]);
+                if (userGameID < 0 || userGameID > gameIDs.size()) {
+                    throw new ResponseException(ResponseException.Code.BadRequestError, String.format("Game does not exist with the id %d", userGameID));
+                }
+                Integer serverGameID = gameIDs.get(userGameID);
+                if (serverGameID == null) {
+                    throw new ResponseException(ResponseException.Code.BadRequestError, "Game does not exist with the id " + userGameID);
+                }
+                var joinGameRequest = new JoinGameRequest(color, serverGameID);
 
-            server.joinGame(joinGameRequest, authToken);
+                server.joinGame(joinGameRequest, authToken);
 
-            return ChessBoardRenderer.drawBoard(new GameData(userGameID, "", "", "game", new ChessGame()), color);
+                return ChessBoardRenderer.drawBoard(new GameData(userGameID, "", "", "game", new ChessGame()), color);
+            } catch (Exception ex) {
+                throw new ResponseException(ResponseException.Code.BadRequestError, "Expected: <ID> [WHITE|BLACK]");
+            }
         }
         throw new ResponseException(ResponseException.Code.BadRequestError, "Expected: <ID> [WHITE|BLACK]");
     }
