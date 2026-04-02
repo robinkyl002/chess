@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
@@ -197,40 +198,9 @@ public class ChessClient {
         int startRow = (color == ChessGame.TeamColor.WHITE) ? 0 : SQUARES_ON_SIDE - 1;
         int endRow = (color == ChessGame.TeamColor.WHITE) ? SQUARES_ON_SIDE : -1;
         drawHorizontalBorder(out, increment);
-        int spaceNumber = 1;
 
         for (int i = startRow; i != endRow; i += increment) {
-            setBorderColors(out);
-            out.print(" " + VERTICAL_HEADERS[i] + " ");
-
-            int startColumn = (color == ChessGame.TeamColor.WHITE) ? 0 : SQUARES_ON_SIDE - 1;
-            int endColumn = (color == ChessGame.TeamColor.WHITE) ? SQUARES_ON_SIDE : -1;
-            for (int j = startColumn; j != endColumn; j += increment) {
-                var piece = gameBoard.getPiece(new ChessPosition(i + 1, j + 1));
-
-                if (spaceNumber % 2 == 0) {
-                    out.print(SET_BG_COLOR_BLACK);
-                } else {
-                    out.print(SET_BG_COLOR_WHITE);
-                }
-                if (piece == null) {
-                    out.print(EMPTY);
-                } else {
-                    if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                        out.print(SET_TEXT_COLOR_RED);
-                    } else {
-                        out.print(SET_TEXT_COLOR_BLUE);
-                    }
-
-                    out.print(getPieceSymbol(piece));
-                }
-                spaceNumber++;
-            }
-            spaceNumber++;
-            setBorderColors(out);
-            out.print(" " + VERTICAL_HEADERS[i] + " ");
-            out.print(RESET);
-            out.println();
+            drawRow(out, i, gameBoard, color);
         }
         drawHorizontalBorder(out, increment);
         return "";
@@ -255,6 +225,31 @@ public class ChessClient {
         out.println();
     }
 
+    private static void drawRow(PrintStream out, int currRow, ChessBoard board, ChessGame.TeamColor playerColor) {
+        setBorderColors(out);
+        out.print(" " + VERTICAL_HEADERS[currRow] + " ");
+
+        int startColumn = (playerColor == ChessGame.TeamColor.WHITE) ? 0 : SQUARES_ON_SIDE - 1;
+        int endColumn = (playerColor == ChessGame.TeamColor.WHITE) ? SQUARES_ON_SIDE : -1;
+        int step = (playerColor == ChessGame.TeamColor.WHITE) ? 1 : -1;
+        for (int j = startColumn; j != endColumn; j += step) {
+            var piece = board.getPiece(new ChessPosition(currRow + 1, j + 1));
+
+            out.print(((currRow + j) % 2 == 0) ? SET_BG_COLOR_BLACK : SET_BG_COLOR_WHITE);
+
+            if (piece == null) {
+                out.print(EMPTY);
+            } else {
+                out.print(getPieceColor(piece));
+                out.print(getPieceSymbol(piece));
+            }
+        }
+        setBorderColors(out);
+        out.print(" " + VERTICAL_HEADERS[currRow] + " ");
+        out.print(RESET);
+        out.println();
+    }
+
     private static void setBorderColors(PrintStream out) {
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(SET_TEXT_COLOR_BLACK);
@@ -269,5 +264,9 @@ public class ChessClient {
             case BISHOP -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_BISHOP : BLACK_BISHOP;
             case PAWN -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_PAWN : BLACK_PAWN;
         };
+    }
+
+    private static String getPieceColor(ChessPiece piece) {
+        return (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? SET_TEXT_COLOR_RED : SET_TEXT_COLOR_BLUE;
     }
 }
