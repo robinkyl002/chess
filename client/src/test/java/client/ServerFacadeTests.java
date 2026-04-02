@@ -4,6 +4,7 @@ import exception.ResponseException;
 import org.junit.jupiter.api.*;
 import server.Server;
 import server.ServerFacade;
+import service.CreateGameRequest;
 import service.LoginRequest;
 import service.LogoutRequest;
 import service.RegisterRequest;
@@ -95,8 +96,12 @@ public class ServerFacadeTests {
 
     @Test
     @DisplayName("Create Game Successful")
-    public void createGameSuccess() {
-        assertEquals(true, true);
+    public void createGameSuccess() throws ResponseException {
+        var registerResult = facade.register(new RegisterRequest("user", "pass", "email"));
+
+        var createGameResult = facade.createGame(new CreateGameRequest("new game"), registerResult.authToken());
+        Assertions.assertNotNull(createGameResult);
+        assertEquals(1, createGameResult.gameID());
     }
 
     @Test
@@ -118,12 +123,16 @@ public class ServerFacadeTests {
     @Test
     @DisplayName("List Games Successful")
     public void listGameSuccess() {
-        assertEquals(true, true);
+
     }
 
     @Test
-    @DisplayName("List Games Failed - Empty list")
-    public void listGameFail() {}
+    @DisplayName("List Games Failed - No auth token")
+    public void listGameFail() {
+        Exception ex = assertThrows(ResponseException.class, () -> facade.listGames(null));
+
+        Assertions.assertEquals("Error: unauthorized", ex.getMessage());
+    }
 
     @Test
     @DisplayName("Clear DB Successful")
