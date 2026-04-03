@@ -19,4 +19,20 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     public void handleMessage(@NotNull WsMessageContext ctx) throws Exception {
 
     }
+
+    private void connect() {
+
+    }
+
+    private void makeMove() {
+
+    }
+
+    private void leave() {
+
+    }
+
+    private void resign() {
+
+    }
 }
