@@ -13,14 +13,16 @@ import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
 
-public class ChessClient {
+public class ChessClient implements NotificationHandler {
     private String username = null;
     private final ServerFacade server;
+    private final WebsocketFacade ws;
     private String authToken;
     private final HashMap<Integer, Integer> gameIDs = new HashMap<>();
 
-    public ChessClient(String url) {
+    public ChessClient(String url) throws ResponseException {
         server = new ServerFacade(url);
+        ws = new WebsocketFacade(url, this);
         authToken = "";
     }
 
@@ -43,6 +45,13 @@ public class ChessClient {
             }
         }
         System.out.println();
+    }
+
+
+    @Override
+    public void notify(String notification) {
+        System.out.println(notification);
+        printPrompt();
     }
 
     private void printPrompt() {
