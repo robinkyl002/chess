@@ -13,16 +13,11 @@ public class WebsocketFacade extends Endpoint {
     private final Session session;
     private final NotificationHandler notificationHandler;
 
-    public WebsocketFacade(String url) throws ResponseException {
+    public WebsocketFacade(String url, NotificationHandler notificationHandler) throws ResponseException {
         try {
             url = url.replace("http", "ws");
             URI socketURI = new URI(url + "/ws");
-            this.notificationHandler = new NotificationHandler() {
-                @Override
-                public void notify(String notification) {
-
-                }
-            };
+            this.notificationHandler = notificationHandler;
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, socketURI);
