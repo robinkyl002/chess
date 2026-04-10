@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import static exception.ResponseException.Code.*;
+import static exception.ResponseException.errorMessageFromCode;
+
 public class WebsocketFacade extends Endpoint {
     private final Session session;
     private final NotificationHandler notificationHandler;
@@ -45,8 +48,7 @@ public class WebsocketFacade extends Endpoint {
             });
 
         } catch (DeploymentException | IOException | URISyntaxException ex) {
-            throw new ResponseException(ResponseException.Code.BadRequestError,
-                    ResponseException.errorMessageFromCode(ResponseException.Code.BadRequestError));
+            throw new ResponseException(BadRequestError, errorMessageFromCode(BadRequestError));
         }
     }
     @Override
@@ -54,7 +56,19 @@ public class WebsocketFacade extends Endpoint {
 
     }
 
-    public void joinGameAsPlayer(String message) {}
-    public void joinGameAsObserver() {}
+    public void joinGameAsPlayer(String playerName) throws ResponseException {
+        try {
+            session.getBasicRemote().sendText(playerName);
+        } catch (IOException ex) {
+            throw new ResponseException(ServerError, errorMessageFromCode(ServerError));
+        }
+    }
+    public void joinGameAsObserver(String playerName) throws ResponseException {
+        try {
+            session.getBasicRemote().sendText(playerName);
+        } catch (IOException ex) {
+            throw new ResponseException(ServerError, errorMessageFromCode(ServerError));
+        }
+    }
 
 }
