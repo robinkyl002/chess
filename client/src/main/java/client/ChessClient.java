@@ -18,12 +18,14 @@ public class ChessClient implements NotificationHandler {
     private final ServerFacade server;
     private final WebsocketFacade ws;
     private String authToken;
+    private State state;
     private final HashMap<Integer, Integer> gameIDs = new HashMap<>();
 
     public ChessClient(String url) throws ResponseException {
         server = new ServerFacade(url);
         ws = new WebsocketFacade(url, this);
         authToken = "";
+        state = State.IN_LOBBY;
     }
 
     public void run() {
@@ -190,15 +192,16 @@ public class ChessClient implements NotificationHandler {
     }
 
     public String help() {
-        if (authToken == null || authToken.isEmpty()) {
-            return """
+        if (state == State.IN_LOBBY) {
+            if (authToken == null || authToken.isEmpty()) {
+                return """
                     - register <USERNAME> <PASSWORD> <EMAIL> - to create an account
                     - login <USERNAME> <PASSWORD> - to play chess
                     - quit - playing chess
                     - help - with possible commands
                     """;
-        }
-        return """
+            }
+            return """
                 - create <NAME> - to start a new game
                 - join <ID> [WHITE|BLACK]- a game
                 - observe <ID> - a game
@@ -207,6 +210,24 @@ public class ChessClient implements NotificationHandler {
                 - quit - playing chess
                 - help - with possible commands
                 """;
+        } else if (state == State.PLAYING) {
+            return """
+                 - redraw - to redraw the chess board
+                 - highlight <PIECE POSITION> - possible moves for a specified piece
+                 - move <CURRENT POSITION> <NEW POSITION> - to make a move
+                 - leave - to return to the lobby
+                 - resign - to concede defeat to your opponent
+                 - help - with possible commands
+                 """;
+        } else {
+            return """
+                 - redraw - to redraw the chess board
+                 - highlight <PIECE POSITION> - possible moves for a specified piece
+                 - leave - to return to the lobby
+                 - help - with possible commands
+                 """;
+        }
+
     }
 
     private void assertSignedIn() throws ResponseException {
