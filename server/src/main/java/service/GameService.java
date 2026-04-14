@@ -36,6 +36,7 @@ public class GameService {
             throw new ResponseException(ServerError, errorMessageFromCode(ServerError) + ex.getMessage());
         }
     }
+
     public void joinGame(JoinGameRequest joinGameRequest, String authToken) throws ResponseException {
         try {
             if (joinGameRequest.playerColor() == null || joinGameRequest.gameID() == null) {
@@ -56,6 +57,15 @@ public class GameService {
             throw new ResponseException(ServerError, errorMessageFromCode(ServerError) + ex.getMessage());
         }
     }
+
+    public GameData retrieveGame(int gameID) throws ResponseException {
+        try {
+            return gameDAO.getGame(gameID);
+        } catch (DataAccessException e) {
+            throw new ResponseException(ServerError, errorMessageFromCode(ServerError) + e.getMessage());
+        }
+    }
+
     public ListGamesResult listGames() throws ResponseException {
         try {
             Collection<GameData> games = gameDAO.listGames();
