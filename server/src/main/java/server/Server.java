@@ -34,7 +34,7 @@ public class Server {
 
         userService = new UserService(userDAO, authDAO);
         gameService = new GameService(authDAO, gameDAO);
-        this.websocketHandler = new WebsocketHandler();
+        this.websocketHandler = new WebsocketHandler(gameService, userService);
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
         createHandlers();
 
@@ -45,7 +45,7 @@ public class Server {
     public Server(UserService userService, GameService gameService) {
         this.userService = userService;
         this.gameService = gameService;
-        this.websocketHandler = new WebsocketHandler();
+        this.websocketHandler = new WebsocketHandler(gameService, userService);
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
         createHandlers();
