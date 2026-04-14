@@ -6,11 +6,13 @@ import model.GameData;
 import server.ServerFacade;
 import service.*;
 import ui.ChessBoardRenderer;
+import websocket.messages.LoadGameMessage;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 
+import static exception.ResponseException.Code.*;
 import static ui.EscapeSequences.*;
 
 public class ChessClient implements NotificationHandler {
@@ -19,6 +21,8 @@ public class ChessClient implements NotificationHandler {
     private final WebsocketFacade ws;
     private String authToken;
     private State state;
+    private ChessGame.TeamColor playerColor;
+    private GameData currGameState;
     private final HashMap<Integer, Integer> gameIDs = new HashMap<>();
 
     public ChessClient(String url) throws ResponseException {
@@ -56,6 +60,13 @@ public class ChessClient implements NotificationHandler {
         printPrompt();
     }
 
+    @Override
+    public void loadGameNotification(LoadGameMessage loadGameMessage) {
+        ChessGame.TeamColor loadColor = (playerColor != null ? playerColor : ChessGame.TeamColor.WHITE);
+        ChessBoardRenderer.drawBoard(loadGameMessage.getGame(), loadColor);
+        printPrompt();
+    }
+
     private void printPrompt() {
         System.out.print("\n" + RESET + ">>> " + SET_TEXT_COLOR_GREEN);
     }
@@ -88,17 +99,17 @@ public class ChessClient implements NotificationHandler {
             username = result.username();
             return String.format("Logged in as %s", result.username());
         }
-        throw new ResponseException(ResponseException.Code.BadRequestError, "Expected: <USERNAME> <PASSWORD> <EMAIL>");
+        throw new ResponseException(BadRequestError, "Expected: <USERNAME> <PASSWORD> <EMAIL>");
     }
 
     public String login(String... params) throws ResponseException {
         if (params.length >= 2) {
             var result = server.login(new LoginRequest(params[0], params[1]));
             authToken = result.authToken();
-            username = String.format(" - " + result.username());
+            username = result.username();
             return String.format("Logged in as %s", result.username());
         }
-        throw new ResponseException(ResponseException.Code.BadRequestError, "Expected: <USERNAME> <PASSWORD>");
+        throw new ResponseException(BadRequestError, "Expected: <USERNAME> <PASSWORD>");
     }
 
     public String logout() throws ResponseException {
@@ -118,7 +129,7 @@ public class ChessClient implements NotificationHandler {
             gameIDs.put(nextKey, result.gameID());
             return String.format("You created a game called %s. The id is %d", gameName, nextKey);
         }
-        throw new ResponseException(ResponseException.Code.BadRequestError, "Expected: <NAME>");
+        throw new ResponseException(BadRequestError, "Expected: <NAME>");
     }
 
     public String listGames() throws ResponseException {
@@ -147,24 +158,26 @@ public class ChessClient implements NotificationHandler {
                 ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(params[1].toUpperCase());
                 int userGameID = Integer.parseInt(params[0]);
                 if (userGameID < 0 || userGameID > gameIDs.size()) {
-                    throw new ResponseException(ResponseException.Code.BadRequestError,
+                    throw new ResponseException(BadRequestError,
                             String.format("Game does not exist with the id %d", userGameID));
                 }
                 Integer serverGameID = gameIDs.get(userGameID);
                 if (serverGameID == null) {
-                    throw new ResponseException(ResponseException.Code.BadRequestError, "Game does not exist with the id " + userGameID);
+                    throw new ResponseException(BadRequestError, "Game does not exist with the id " + userGameID);
                 }
                 var joinGameRequest = new JoinGameRequest(color, serverGameID);
 
                 server.joinGame(joinGameRequest, authToken);
 
+                ws.joinGameAsPlayer(username);
+
                 ChessBoardRenderer.drawBoard(new GameData(userGameID, "", "", "game", new ChessGame()), color);
                 return String.format("Successfully joined game with id %d as color %s\n", userGameID, color.name());
             } catch (IllegalArgumentException ex) {
-                throw new ResponseException(ResponseException.Code.BadRequestError, "Expected: <ID> [WHITE|BLACK]");
+                throw new ResponseException(BadRequestError, "Expected: <ID> [WHITE|BLACK]");
             }
         }
-        throw new ResponseException(ResponseException.Code.BadRequestError, "Expected: <ID> [WHITE|BLACK]");
+        throw new ResponseException(BadRequestError, "Expected: <ID> [WHITE|BLACK]");
     }
 
     public String observeGame(String... params) throws ResponseException {
@@ -173,22 +186,22 @@ public class ChessClient implements NotificationHandler {
             try {
                 int userGameID = Integer.parseInt(params[0]);
                 if (userGameID < 0 || userGameID > gameIDs.size()) {
-                    throw new ResponseException(ResponseException.Code.BadRequestError, "Game does not exist with the id " + userGameID);
+                    throw new ResponseException(BadRequestError, "Game does not exist with the id " + userGameID);
                 }
 
                 Integer serverGameID = gameIDs.get(userGameID);
                 if (serverGameID == null) {
-                    throw new ResponseException(ResponseException.Code.BadRequestError, "Game does not exist with the id " + userGameID);
+                    throw new ResponseException(BadRequestError, "Game does not exist with the id " + userGameID);
                 }
 
                 ChessBoardRenderer.drawBoard(new GameData(userGameID, "", "", "game", new ChessGame()),
                         ChessGame.TeamColor.WHITE);
                 return String.format("Now observing game with id %d", userGameID);
             } catch (IllegalArgumentException e) {
-                throw new ResponseException(ResponseException.Code.BadRequestError, "Expected: <ID>");
+                throw new ResponseException(BadRequestError, "Expected: <ID>");
             }
         }
-        throw new ResponseException(ResponseException.Code.BadRequestError, "Expected: <ID>");
+        throw new ResponseException(BadRequestError, "Expected: <ID>");
     }
 
     public String help() {
@@ -232,7 +245,7 @@ public class ChessClient implements NotificationHandler {
 
     private void assertSignedIn() throws ResponseException {
         if (authToken == null || authToken.isEmpty()) {
-            throw new ResponseException(ResponseException.Code.UnauthorizedError, "You must be signed in to perform this action.");
+            throw new ResponseException(UnauthorizedError, "You must be signed in to perform this action.");
         }
     }
 }
