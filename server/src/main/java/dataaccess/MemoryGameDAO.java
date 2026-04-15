@@ -16,7 +16,7 @@ public class MemoryGameDAO implements GameDAO {
             if (gameName == null) {
                 throw new DataAccessException("GameName cannot be null");
             }
-            var game = new GameData(nextId++, null, null, gameName, new ChessGame());
+            var game = new GameData(nextId++, null, null, gameName, new ChessGame(), false);
             games.put(game.gameID(), game);
             return game.gameID();
         } catch (Exception e) {
@@ -52,8 +52,8 @@ public class MemoryGameDAO implements GameDAO {
                 throw new DataAccessException("Game does not exist");
             }
             var newGame = (color == ChessGame.TeamColor.WHITE) ?
-                    new GameData(gameID, username, currGame.blackUsername(), currGame.gameName(), currGame.game()) :
-                    new GameData(gameID, currGame.whiteUsername(), username, currGame.gameName(), currGame.game());
+                    new GameData(gameID, username, currGame.blackUsername(), currGame.gameName(), currGame.game(), false) :
+                    new GameData(gameID, currGame.whiteUsername(), username, currGame.gameName(), currGame.game(), false);
             games.put(gameID, newGame);
         } catch (Exception e) {
             throw new DataAccessException(e.getMessage());
