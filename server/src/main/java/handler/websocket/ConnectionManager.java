@@ -8,7 +8,6 @@ import websocket.messages.ServerMessage;
 import static exception.ResponseException.Code.ServerError;
 import static exception.ResponseException.errorMessageFromCode;
 
-import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionManager {
