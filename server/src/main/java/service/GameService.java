@@ -10,7 +10,6 @@ import model.GameData;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import static exception.ResponseException.Code.*;
 import static exception.ResponseException.errorMessageFromCode;

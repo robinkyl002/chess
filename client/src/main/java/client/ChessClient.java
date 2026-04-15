@@ -8,12 +8,9 @@ import model.GameData;
 import server.ServerFacade;
 import service.*;
 import ui.ChessBoardRenderer;
-import websocket.commands.MakeMoveCommand;
-import websocket.commands.UserGameCommand;
 import websocket.messages.LoadGameMessage;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Scanner;
 

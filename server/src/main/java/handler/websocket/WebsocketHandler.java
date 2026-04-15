@@ -1,6 +1,5 @@
 package handler.websocket;
 
-import chess.ChessGame;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import exception.ResponseException;
