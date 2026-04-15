@@ -255,15 +255,19 @@ public class ChessClient implements NotificationHandler {
         }
 
         if (params.length == 2) {
+            if (currGameState.game().getTeamTurn() != playerColor) {
+                throw new ResponseException(BadRequestError, "It is not your turn. Please wait for your opponent to play");
+            }
             var startPos = getChessPosition(params[0]);
             var endPos = getChessPosition(params[1]);
 
             var move = new ChessMove(startPos, endPos, null);
 
-            ws.makeMove(authToken, currGameState.gameID(), move, username);
+            ws.makeMove(authToken, currGameState.gameID(), move, username,  playerColor);
 
             ChessBoardRenderer.drawBoard(currGameState, playerColor, null);
 
+            return "";
         }
         throw new  ResponseException(BadRequestError, "Expected: <START POSITION> <END POSITION>. Positions should be in range a1-h8");
     }
