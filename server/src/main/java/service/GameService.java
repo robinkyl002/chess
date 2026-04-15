@@ -60,6 +60,14 @@ public class GameService {
         }
     }
 
+    public void updateGame(GameData gameData) throws ResponseException {
+        try {
+                gameDAO.updateGame(gameData.gameID(), gameData);
+        } catch (DataAccessException e) {
+            throw new ResponseException(ServerError, errorMessageFromCode(ServerError) + e.getMessage());
+        }
+    }
+
     public GameData retrieveGame(int gameID) throws ResponseException {
         try {
             return gameDAO.getGame(gameID);
