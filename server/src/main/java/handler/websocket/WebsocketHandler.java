@@ -1,5 +1,6 @@
 package handler.websocket;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import io.javalin.websocket.*;
@@ -7,12 +8,10 @@ import model.SessionData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
 import service.*;
-import websocket.commands.ConnectCommand;
-import websocket.commands.UserGameCommand;
-import websocket.messages.LoadGameMessage;
-import websocket.messages.Notification;
-import websocket.messages.ServerMessage;
+import websocket.commands.*;
+import websocket.messages.*;
 
+import static chess.ChessGame.TeamColor.*;
 import static exception.ResponseException.Code.*;
 import static exception.ResponseException.errorMessageFromCode;
 
@@ -38,23 +37,27 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     @Override
-    public void handleMessage(@NotNull WsMessageContext ctx) throws Exception {
-        var userGameCommand = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+    public void handleMessage(@NotNull WsMessageContext ctx) throws ResponseException {
+        try {
+            var userGameCommand = new Gson().fromJson(ctx.message(), UserGameCommand.class);
 
-        switch (userGameCommand.getCommandType()) {
-            case CONNECT -> {
-                var connectCommand = new Gson().fromJson(ctx.message(), ConnectCommand.class);
-                connect(connectCommand, ctx.session);
+            switch (userGameCommand.getCommandType()) {
+                case CONNECT -> {
+                    var connectCommand = new Gson().fromJson(ctx.message(), ConnectCommand.class);
+                    connect(connectCommand, ctx.session);
+                }
+                case MAKE_MOVE -> {
+                    makeMove();
+                }
+                case LEAVE -> {
+                    leave();
+                }
+                case RESIGN -> {
+                    resign();
+                }
             }
-            case MAKE_MOVE -> {
-                makeMove();
-            }
-            case LEAVE ->  {
-                leave();
-            }
-            case RESIGN -> {
-                resign();
-            }
+        } catch (IllegalStateException e) {
+            throw new ResponseException(ServerError, e.getMessage());
         }
     }
 
@@ -67,9 +70,11 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         connectionManager.add(session, new SessionData(connectCommand.getAuthToken(), connectCommand.getGameID(),
                 connectCommand.isObserver()));
+
+        var color = (connectCommand.getUsername().equals(currGame.whiteUsername())) ? WHITE : BLACK;
         var message = (connectCommand.isObserver()) ?
                 String.format("%s is now observing the game", connectCommand.getUsername()) :
-                String.format("%s is now playing the game", connectCommand.getUsername());
+                String.format("%s is now playing the game as %s", connectCommand.getUsername(), color.toString().toLowerCase());
 
         var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, message);
 
