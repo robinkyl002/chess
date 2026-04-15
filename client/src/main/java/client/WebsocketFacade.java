@@ -56,25 +56,10 @@ public class WebsocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
-    public void joinGameAsPlayer(String playerName) throws ResponseException {
+    public void connect(String token, int gameID, boolean observer, String username)  throws ResponseException {
         try {
-            session.getBasicRemote().sendText(playerName);
-        } catch (IOException ex) {
-            throw new ResponseException(ServerError, errorMessageFromCode(ServerError));
-        }
-    }
-    public void joinGameAsObserver(String playerName) throws ResponseException {
-        try {
-            session.getBasicRemote().sendText(playerName);
-        } catch (IOException ex) {
-            throw new ResponseException(ServerError, errorMessageFromCode(ServerError));
-        }
-    }
-
-    public void connect(String token, int gameID)  throws ResponseException {
-        try {
-            var userGameCommand = new UserGameCommand(UserGameCommand.CommandType.CONNECT, token, gameID);
-            session.getBasicRemote().sendText(new Gson().toJson(userGameCommand));
+            var connectCommand = new ConnectCommand(UserGameCommand.CommandType.CONNECT, token, gameID, observer, username);
+            session.getBasicRemote().sendText(new Gson().toJson(connectCommand));
         } catch (IOException ex) {
             throw new ResponseException(ServerError, errorMessageFromCode(ServerError));
         }
