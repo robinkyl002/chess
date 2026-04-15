@@ -64,6 +64,7 @@ public class ChessClient implements NotificationHandler {
     public void loadGameNotification(LoadGameMessage loadGameMessage) {
         ChessGame.TeamColor loadColor = (playerColor != null ? playerColor : ChessGame.TeamColor.WHITE);
         ChessBoardRenderer.drawBoard(loadGameMessage.getGame(), loadColor);
+        currGameState = loadGameMessage.getGame();
         printPrompt();
     }
 
@@ -85,6 +86,7 @@ public class ChessClient implements NotificationHandler {
                 case "list" -> listGames();
                 case "logout" -> logout();
                 case "leave" -> leaveGame();
+                case "redraw" -> redraw();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -211,9 +213,19 @@ public class ChessClient implements NotificationHandler {
         assertSignedIn();
         currentlyPlayingOrObserving();
 
+        ws.leaveGame(authToken, currGameState.gameID(), username);
         state = State.IN_LOBBY;
 
-        return help();
+        return "";
+    }
+
+    public String redraw() throws ResponseException {
+        assertSignedIn();
+        currentlyPlayingOrObserving();
+
+        ChessBoardRenderer.drawBoard(currGameState, playerColor);
+
+        return "";
     }
 
     public String help() {
