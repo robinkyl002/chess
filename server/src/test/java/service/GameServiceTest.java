@@ -98,6 +98,11 @@ class GameServiceTest {
         public void joinGame(int gameID, String username, ChessGame.TeamColor color) throws DataAccessException {}
 
         @Override
+        public void updateGame(int gameID, GameData updatedGame) throws DataAccessException {
+
+        }
+
+        @Override
         public void clearGameData() throws DataAccessException {}
     }
 
