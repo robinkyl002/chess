@@ -260,7 +260,7 @@ public class ChessClient implements NotificationHandler {
 
             var move = new ChessMove(startPos, endPos, null);
 
-            ws.makeMove(authToken, currGameState.gameID(), move);
+            ws.makeMove(authToken, currGameState.gameID(), move, username);
 
             ChessBoardRenderer.drawBoard(currGameState, playerColor, null);
 
