@@ -21,10 +21,10 @@ public class ChessBoardRenderer {
 
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         out.print(ERASE_SCREEN);
-        int increment = (color == ChessGame.TeamColor.WHITE) ? 1 : -1;
-        int startRow = (color == ChessGame.TeamColor.WHITE) ? 1 : SQUARES_ON_SIDE;
-        int endRow = (color == ChessGame.TeamColor.WHITE) ? SQUARES_ON_SIDE + 1 : 0;
-        drawHorizontalBorder(out, increment);
+        int increment = (color == ChessGame.TeamColor.WHITE) ? -1 : 1;
+        int startRow = (color == ChessGame.TeamColor.WHITE) ? SQUARES_ON_SIDE : 1;
+        int endRow = (color == ChessGame.TeamColor.WHITE) ? 0 : SQUARES_ON_SIDE + 1 ;
+        drawHorizontalBorder(out, color);
 
         HashSet<ChessMove> possibleMoves;
 
@@ -46,12 +46,14 @@ public class ChessBoardRenderer {
             }
             drawRow(out, i, gameBoard, color, rowMoves, startPos);
         }
-        drawHorizontalBorder(out, increment);
+        drawHorizontalBorder(out, color);
     }
 
-    private static void drawHorizontalBorder(PrintStream out, int increment) {
+    private static void drawHorizontalBorder(PrintStream out, ChessGame.TeamColor playerColor) {
         setBorderColors(out);
         out.print(EMPTY);
+
+        int increment = (playerColor == ChessGame.TeamColor.WHITE) ? 1 : -1;
 
         if (increment == 1) {
             for (int i = 0; i < SQUARES_ON_SIDE; i += increment) {
@@ -98,7 +100,7 @@ public class ChessBoardRenderer {
         for (int j = startColumn; j != endColumn; j += step) {
             var currPosition = new ChessPosition(currRow, j);
             var piece = board.getPiece(currPosition);
-            out.print(((currRow + j) % 2 == 0) ? SET_BG_COLOR_WHITE : SET_BG_COLOR_BLACK);
+            out.print(((currRow + j) % 2 == 0) ? SET_BG_COLOR_BLACK : SET_BG_COLOR_WHITE);
 
             if (piece == null) {
                 out.print(EMPTY);
