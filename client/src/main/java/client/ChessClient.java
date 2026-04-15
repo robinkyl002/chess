@@ -84,6 +84,7 @@ public class ChessClient implements NotificationHandler {
                 case "observe" -> observeGame(params);
                 case "list" -> listGames();
                 case "logout" -> logout();
+                case "leave" -> leaveGame();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -116,6 +117,7 @@ public class ChessClient implements NotificationHandler {
         assertSignedIn();
         server.logout(new LogoutRequest(authToken));
         authToken = null;
+        state = State.IN_LOBBY;
         return String.format("%s logged out.", username);
     }
 
@@ -168,10 +170,11 @@ public class ChessClient implements NotificationHandler {
                 var joinGameRequest = new JoinGameRequest(color, serverGameID);
 
                 server.joinGame(joinGameRequest, authToken);
+                playerColor = color;
 
-                ws.joinGameAsPlayer(username);
+                ws.connect(authToken, serverGameID, false, username);
 
-                ChessBoardRenderer.drawBoard(new GameData(userGameID, "", "", "game", new ChessGame()), color);
+                state = State.PLAYING;
                 return String.format("Successfully joined game with id %d as color %s\n", userGameID, color.name());
             } catch (IllegalArgumentException ex) {
                 throw new ResponseException(BadRequestError, "Expected: <ID> [WHITE|BLACK]");
@@ -194,14 +197,23 @@ public class ChessClient implements NotificationHandler {
                     throw new ResponseException(BadRequestError, "Game does not exist with the id " + userGameID);
                 }
 
-                ChessBoardRenderer.drawBoard(new GameData(userGameID, "", "", "game", new ChessGame()),
-                        ChessGame.TeamColor.WHITE);
+                ws.connect(authToken, serverGameID, true, username);
+                state = State.OBSERVING;
                 return String.format("Now observing game with id %d", userGameID);
             } catch (IllegalArgumentException e) {
                 throw new ResponseException(BadRequestError, "Expected: <ID>");
             }
         }
         throw new ResponseException(BadRequestError, "Expected: <ID>");
+    }
+
+    public String leaveGame() throws ResponseException {
+        assertSignedIn();
+        currentlyPlayingOrObserving();
+
+        state = State.IN_LOBBY;
+
+        return help();
     }
 
     public String help() {
@@ -241,6 +253,18 @@ public class ChessClient implements NotificationHandler {
                  """;
         }
 
+    }
+
+    private void currentlyPlaying() throws ResponseException {
+        if (state != State.PLAYING) {
+            throw new ResponseException(UnauthorizedError, "You must be playing to use this command");
+        }
+    }
+
+    private void currentlyPlayingOrObserving() throws ResponseException {
+        if (state == State.IN_LOBBY) {
+            throw new ResponseException(UnauthorizedError, "You must be playing or observing to use this command");
+        }
     }
 
     private void assertSignedIn() throws ResponseException {
