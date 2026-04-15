@@ -1,6 +1,7 @@
 package client;
 
 import chess.ChessGame;
+import chess.ChessPosition;
 import exception.ResponseException;
 import model.GameData;
 import server.ServerFacade;
@@ -65,7 +66,7 @@ public class ChessClient implements NotificationHandler {
         ChessGame.TeamColor loadColor = (playerColor != null ? playerColor : ChessGame.TeamColor.WHITE);
         ChessBoardRenderer.drawBoard(loadGameMessage.getGame(), loadColor);
         currGameState = loadGameMessage.getGame();
-        printPrompt();
+        // printPrompt();
     }
 
     private void printPrompt() {
@@ -87,6 +88,9 @@ public class ChessClient implements NotificationHandler {
                 case "logout" -> logout();
                 case "leave" -> leaveGame();
                 case "redraw" -> redraw();
+                case "resign" -> resign();
+                case "highlight" -> null;
+                case "move" -> null;
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -226,6 +230,28 @@ public class ChessClient implements NotificationHandler {
         ChessBoardRenderer.drawBoard(currGameState, playerColor);
 
         return "";
+    }
+
+    public String resign() throws ResponseException {
+        assertSignedIn();
+        currentlyPlaying();
+
+
+        return "";
+    }
+
+    public String highlight(String ... params) throws ResponseException {
+        assertSignedIn();
+        currentlyPlayingOrObserving();
+        if (params.length == 1 && params[0].length() == 2) {
+            var input = params[0];
+            int row = Integer.parseInt(input.substring(0,1));
+            int col = Integer.parseInt(input.substring(1));
+
+            var position = new ChessPosition(row, col);
+            return position.toString();
+        }
+        throw new ResponseException(BadRequestError, "Expected: <POSITION>");
     }
 
     public String help() {
