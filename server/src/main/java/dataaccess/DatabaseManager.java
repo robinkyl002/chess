@@ -54,10 +54,12 @@ public class DatabaseManager {
                 `blackUsername` varchar(256) DEFAULT NULL,
                 `whiteUsername` varchar(256) DEFAULT NULL,
                 `chessGame` TEXT NOT NULL,
+                `completed` boolean NOT NULL DEFAULT FALSE,
                 PRIMARY KEY (`id`),
                 INDEX(gameName),
                 INDEX(blackUsername),
                 INDEX(whiteUsername),
+                INDEX(completed),
                 CONSTRAINT `fk_game_black_username`
                         FOREIGN KEY (`blackUsername`)
                         REFERENCES user(`username`)
