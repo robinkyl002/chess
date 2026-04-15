@@ -48,8 +48,10 @@ public class GameService {
             GameData currGame = gameDAO.getGame(joinGameRequest.gameID());
 
             // Check to make sure the color is not already taken by someone else
-            if ((joinGameRequest.playerColor() == ChessGame.TeamColor.WHITE && currGame.whiteUsername() != null)
-                    || (joinGameRequest.playerColor() == ChessGame.TeamColor.BLACK && currGame.blackUsername() != null)) {
+            if ((joinGameRequest.playerColor() == ChessGame.TeamColor.WHITE && currGame.whiteUsername() != null
+                    && !currGame.whiteUsername().equals(auth.username()) )
+                    || (joinGameRequest.playerColor() == ChessGame.TeamColor.BLACK && currGame.blackUsername() != null
+                    && !currGame.blackUsername().equals(auth.username()))) {
                     throw new ResponseException(AlreadyTakenError, errorMessageFromCode(AlreadyTakenError));
             }
             gameDAO.joinGame(joinGameRequest.gameID(), auth.username(), joinGameRequest.playerColor());
