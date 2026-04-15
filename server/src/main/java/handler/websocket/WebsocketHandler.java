@@ -50,7 +50,8 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     makeMove();
                 }
                 case LEAVE -> {
-                    leave();
+                    var leaveCommand = new Gson().fromJson(ctx.message(), LeaveCommand.class);
+                    leave(leaveCommand, ctx.session);
                 }
                 case RESIGN -> {
                     resign();
@@ -89,8 +90,16 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     }
 
-    private void leave() {
+    private void leave(LeaveCommand leaveCommand, Session session) throws ResponseException {
+        if (!userService.validAuth(leaveCommand.getAuthToken())) {
+            throw new ResponseException(UnauthorizedError, errorMessageFromCode(UnauthorizedError));
+        }
 
+        var message = String.format("%s left the game", leaveCommand.getUsername());
+
+        var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, message);
+
+        connectionManager.broadcast(session, notification, leaveCommand.getGameID());
     }
 
     private void resign() {
