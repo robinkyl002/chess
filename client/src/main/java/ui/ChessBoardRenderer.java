@@ -1,13 +1,12 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 import model.GameData;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.HashSet;
 
 import static ui.EscapeSequences.*;
 
@@ -17,18 +16,35 @@ public class ChessBoardRenderer {
     private final static String[] HORIZONTAL_HEADERS = {"a", "b", "c", "d", "e", "f", "g", "h"};
     private final static String[] VERTICAL_HEADERS = {"8", "7", "6", "5", "4", "3", "2", "1"};
 
-    public static void drawBoard (GameData gameData, ChessGame.TeamColor color) {
+    public static void drawBoard (GameData gameData, ChessGame.TeamColor color, Collection<ChessMove> validMoves) {
         var gameBoard = gameData.game().getBoard();
 
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         out.print(ERASE_SCREEN);
         int increment = (color == ChessGame.TeamColor.WHITE) ? 1 : -1;
-        int startRow = (color == ChessGame.TeamColor.WHITE) ? 0 : SQUARES_ON_SIDE - 1;
-        int endRow = (color == ChessGame.TeamColor.WHITE) ? SQUARES_ON_SIDE : -1;
+        int startRow = (color == ChessGame.TeamColor.WHITE) ? 1 : SQUARES_ON_SIDE;
+        int endRow = (color == ChessGame.TeamColor.WHITE) ? SQUARES_ON_SIDE + 1 : 0;
         drawHorizontalBorder(out, increment);
 
+        HashSet<ChessMove> possibleMoves;
+
+        if (validMoves == null || validMoves.isEmpty()) {
+            possibleMoves = new HashSet<>();
+        } else {
+            possibleMoves = new HashSet<>(validMoves);
+        }
+
+        var startPos = (!possibleMoves.isEmpty()) ? possibleMoves.iterator().next().getStartPosition() : null;
         for (int i = startRow; i != endRow; i += increment) {
-            drawRow(out, i, gameBoard, color);
+            HashSet<ChessPosition> rowMoves = new HashSet<>();
+            if (!possibleMoves.isEmpty()) {
+                for (ChessMove move : possibleMoves) {
+                    if (move.getEndPosition().getRow() == i) {
+                        rowMoves.add(move.getEndPosition());
+                    }
+                }
+            }
+            drawRow(out, i, gameBoard, color, rowMoves, startPos);
         }
         drawHorizontalBorder(out, increment);
     }
@@ -52,16 +68,36 @@ public class ChessBoardRenderer {
         out.println();
     }
 
-    private static void drawRow(PrintStream out, int currRow, ChessBoard board, ChessGame.TeamColor playerColor) {
+    private static void drawRow(PrintStream out, int currRow, ChessBoard board, ChessGame.TeamColor playerColor,
+                                Collection<ChessPosition> validPositions, ChessPosition startPos) {
         setBorderColors(out);
-        out.print(" " + VERTICAL_HEADERS[currRow] + " ");
+        out.print(" " + (currRow) + " ");
 
-        int startColumn = (playerColor == ChessGame.TeamColor.WHITE) ? 0 : SQUARES_ON_SIDE - 1;
-        int endColumn = (playerColor == ChessGame.TeamColor.WHITE) ? SQUARES_ON_SIDE : -1;
+        int startColumn = (playerColor == ChessGame.TeamColor.WHITE) ? 1 : SQUARES_ON_SIDE ;
+        int endColumn = (playerColor == ChessGame.TeamColor.WHITE) ? SQUARES_ON_SIDE + 1: 0;
         int step = (playerColor == ChessGame.TeamColor.WHITE) ? 1 : -1;
-        for (int j = startColumn; j != endColumn; j += step) {
-            var piece = board.getPiece(new ChessPosition(currRow + 1, j + 1));
 
+        boolean highlightRow = (validPositions != null && !validPositions.isEmpty())
+                || (startPos != null && startPos.getRow() == currRow);
+
+        if (highlightRow) {
+            drawRowWithHighlight(out, currRow, startColumn, endColumn, step, board, startPos, validPositions);
+        }
+        else {
+            drawStandardRow(out, currRow, startColumn, endColumn, step, board);
+        }
+
+        setBorderColors(out);
+        out.print(" " + (currRow) + " ");
+        out.print(RESET);
+        out.println();
+    }
+
+    private static void drawStandardRow(PrintStream out, int currRow, int startColumn,
+                                        int endColumn, int step, ChessBoard board) {
+        for (int j = startColumn; j != endColumn; j += step) {
+            var currPosition = new ChessPosition(currRow, j);
+            var piece = board.getPiece(currPosition);
             out.print(((currRow + j) % 2 == 0) ? SET_BG_COLOR_WHITE : SET_BG_COLOR_BLACK);
 
             if (piece == null) {
@@ -71,10 +107,28 @@ public class ChessBoardRenderer {
                 out.print(getPieceSymbol(piece));
             }
         }
-        setBorderColors(out);
-        out.print(" " + VERTICAL_HEADERS[currRow] + " ");
-        out.print(RESET);
-        out.println();
+    }
+
+    private static void drawRowWithHighlight(PrintStream out, int currRow, int startColumn,
+                                             int endColumn, int step, ChessBoard board,
+                                             ChessPosition startPos, Collection<ChessPosition> validPositions) {
+        for (int j = startColumn; j != endColumn; j += step) {
+            var currPosition = new ChessPosition(currRow, j);
+            var piece = board.getPiece(currPosition);
+
+            if (validPositions.contains(currPosition) || currPosition.equals(startPos)) {
+                out.print(((currRow + j) % 2 == 0) ? SET_BG_COLOR_GREEN : SET_BG_COLOR_DARK_GREEN);
+            } else {
+                out.print(((currRow + j) % 2 == 0) ? SET_BG_COLOR_WHITE : SET_BG_COLOR_BLACK);
+            }
+
+            if (piece == null) {
+                out.print(EMPTY);
+            } else {
+                out.print((currPosition.equals(startPos)) ? SET_TEXT_COLOR_BLACK : getPieceColor(piece));
+                out.print(getPieceSymbol(piece));
+            }
+        }
     }
 
     private static void setBorderColors(PrintStream out) {
