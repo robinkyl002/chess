@@ -1,6 +1,7 @@
 package client;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import chess.ChessPosition;
 import exception.ResponseException;
 import model.GameData;
@@ -10,6 +11,7 @@ import ui.ChessBoardRenderer;
 import websocket.messages.LoadGameMessage;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -64,9 +66,9 @@ public class ChessClient implements NotificationHandler {
     @Override
     public void loadGameNotification(LoadGameMessage loadGameMessage) {
         ChessGame.TeamColor loadColor = (playerColor != null ? playerColor : ChessGame.TeamColor.WHITE);
-        ChessBoardRenderer.drawBoard(loadGameMessage.getGame(), loadColor);
+        ChessBoardRenderer.drawBoard(loadGameMessage.getGame(), loadColor, null);
         currGameState = loadGameMessage.getGame();
-        // printPrompt();
+        printPrompt();
     }
 
     private void printPrompt() {
@@ -89,7 +91,7 @@ public class ChessClient implements NotificationHandler {
                 case "leave" -> leaveGame();
                 case "redraw" -> redraw();
                 case "resign" -> resign();
-                case "highlight" -> null;
+                case "highlight" -> highlight(params);
                 case "move" -> null;
                 case "quit" -> "quit";
                 default -> help();
@@ -227,7 +229,10 @@ public class ChessClient implements NotificationHandler {
         assertSignedIn();
         currentlyPlayingOrObserving();
 
-        ChessBoardRenderer.drawBoard(currGameState, playerColor);
+        if (currGameState == null) {
+            throw new  ResponseException(BadRequestError, "Could not load current game state. Please try joining the game again");
+        }
+        ChessBoardRenderer.drawBoard(currGameState, playerColor, null);
 
         return "";
     }
@@ -244,14 +249,39 @@ public class ChessClient implements NotificationHandler {
         assertSignedIn();
         currentlyPlayingOrObserving();
         if (params.length == 1 && params[0].length() == 2) {
-            var input = params[0];
-            int row = Integer.parseInt(input.substring(0,1));
-            int col = Integer.parseInt(input.substring(1));
+            var position = getChessPosition(params);
+            var selectedPiece = currGameState.game().getBoard().getPiece(position);
+            if (selectedPiece == null) {
+                throw new ResponseException(BadRequestError,
+                        "This position does not have a piece. Please select a valid position with a chess piece on it");
+            }
 
-            var position = new ChessPosition(row, col);
-            return position.toString();
+            var validMoves = currGameState.game().validMoves(position);
+
+            ChessBoardRenderer.drawBoard(currGameState, playerColor, validMoves);
+
+            if (validMoves.isEmpty()) {
+                return "There are no possible moves for this piece";
+            }
+            return "";
         }
-        throw new ResponseException(BadRequestError, "Expected: <POSITION>");
+        throw new ResponseException(BadRequestError, "Expected: <POSITION>. Position should be in range a1-h8.");
+    }
+
+    private ChessPosition getChessPosition(String ... params) throws ResponseException {
+        var input = params[0];
+        int row = Integer.parseInt(input.substring(1));
+        var colCharacter = input.charAt(0);
+
+        int col = colCharacter - 'a' + 1;
+        if (row < 1 || row > 8) {
+            throw new ResponseException(BadRequestError, "Invalid row " + row);
+        }
+        if (col < 1 || col > 8) {
+            throw new ResponseException(BadRequestError, "Invalid column " + colCharacter);
+        }
+
+        return new ChessPosition(row, col);
     }
 
     public String help() {
