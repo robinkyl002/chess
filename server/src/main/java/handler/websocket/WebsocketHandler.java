@@ -1,6 +1,7 @@
 package handler.websocket;
 
 import chess.ChessGame;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import io.javalin.websocket.*;
@@ -14,6 +15,7 @@ import websocket.messages.*;
 import static chess.ChessGame.TeamColor.*;
 import static exception.ResponseException.Code.*;
 import static exception.ResponseException.errorMessageFromCode;
+import static websocket.messages.ServerMessage.ServerMessageType.*;
 
 public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
     private ConnectionManager connectionManager = new ConnectionManager();
@@ -47,7 +49,8 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     connect(connectCommand, ctx.session);
                 }
                 case MAKE_MOVE -> {
-                    makeMove();
+                    var makeMoveCommand = new Gson().fromJson(ctx.message(), MakeMoveCommand.class);
+                    makeMove(makeMoveCommand, ctx.session);
                 }
                 case LEAVE -> {
                     var leaveCommand = new Gson().fromJson(ctx.message(), LeaveCommand.class);
@@ -77,7 +80,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 String.format("%s is now observing the game", connectCommand.getUsername()) :
                 String.format("%s is now playing the game as %s", connectCommand.getUsername(), color.toString().toLowerCase());
 
-        var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        var notification = new Notification(NOTIFICATION, message);
 
         connectionManager.broadcast(session, notification, connectCommand.getGameID());
 
@@ -86,8 +89,37 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     }
 
-    private void makeMove() {
+    private void makeMove(MakeMoveCommand makeMoveCommand, Session session) throws ResponseException {
+        if (!userService.validAuth(makeMoveCommand.getAuthToken())) {
+            throw new ResponseException(UnauthorizedError, errorMessageFromCode(UnauthorizedError));
+        }
 
+        var currGame = gameService.retrieveGame(makeMoveCommand.getGameID());
+        var startPos = makeMoveCommand.getMove().getStartPosition();
+
+        if (currGame.game().getBoard().getPiece(startPos).getTeamColor() != makeMoveCommand.getPlayerColor()) {
+            var notification = new ErrorMessage(ERROR, "You cannot move the other team's pieces");
+            connectionManager.personalMessage(session, notification);
+            return;
+        }
+
+        try {
+            currGame.game().makeMove(makeMoveCommand.getMove());
+
+            gameService.updateGame(currGame);
+        } catch (InvalidMoveException e) {
+            connectionManager.personalMessage(session, new ErrorMessage(ERROR, "This move is not valid. Please try another."));
+            return;
+        }
+
+        var notification =  new Notification(NOTIFICATION, String.format("%s moved from %s to %s", makeMoveCommand.getUsername(),
+                makeMoveCommand.getMove().getStartPosition().toString(), makeMoveCommand.getMove().getEndPosition().toString()));
+
+        connectionManager.broadcast(session, notification, makeMoveCommand.getGameID());
+
+        var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, currGame);
+        connectionManager.broadcast(session, loadGameMessage,  makeMoveCommand.getGameID());
+        connectionManager.personalMessage(session, loadGameMessage);
     }
 
     private void leave(LeaveCommand leaveCommand, Session session) throws ResponseException {
@@ -97,9 +129,9 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         var message = String.format("%s left the game", leaveCommand.getUsername());
 
-        var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        var notification = new Notification(NOTIFICATION, message);
 
-        var personalMessage = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, "You have left the game");
+        var personalMessage = new Notification(NOTIFICATION, "You have left the game");
 
         connectionManager.broadcast(session, notification, leaveCommand.getGameID());
         connectionManager.personalMessage(session, personalMessage);
