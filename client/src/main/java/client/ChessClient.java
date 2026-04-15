@@ -8,6 +8,8 @@ import model.GameData;
 import server.ServerFacade;
 import service.*;
 import ui.ChessBoardRenderer;
+import websocket.commands.MakeMoveCommand;
+import websocket.commands.UserGameCommand;
 import websocket.messages.LoadGameMessage;
 
 import java.util.Arrays;
@@ -92,7 +94,7 @@ public class ChessClient implements NotificationHandler {
                 case "redraw" -> redraw();
                 case "resign" -> resign();
                 case "highlight" -> highlight(params);
-                case "move" -> null;
+                case "move" -> makeMove(params);
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -243,6 +245,27 @@ public class ChessClient implements NotificationHandler {
 
 
         return "";
+    }
+
+    public String makeMove(String ...params) throws ResponseException {
+        assertSignedIn();
+        currentlyPlaying();
+        if (currGameState.completed()) {
+            throw new ResponseException(BadRequestError, "Game is already complete.");
+        }
+
+        if (params.length == 2) {
+            var startPos = getChessPosition(params[0]);
+            var endPos = getChessPosition(params[1]);
+
+            var move = new ChessMove(startPos, endPos, null);
+
+            ws.makeMove(authToken, currGameState.gameID(), move);
+
+            ChessBoardRenderer.drawBoard(currGameState, playerColor, null);
+
+        }
+        throw new  ResponseException(BadRequestError, "Expected: <START POSITION> <END POSITION>. Positions should be in range a1-h8");
     }
 
     public String highlight(String ... params) throws ResponseException {
