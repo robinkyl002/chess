@@ -99,7 +99,11 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, message);
 
+        var personalMessage = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, "You have left the game");
+
         connectionManager.broadcast(session, notification, leaveCommand.getGameID());
+        connectionManager.personalMessage(session, personalMessage);
+        connectionManager.remove(session);
     }
 
     private void resign() {
