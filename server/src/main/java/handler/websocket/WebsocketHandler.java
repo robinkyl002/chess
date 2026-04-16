@@ -56,7 +56,8 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     leave(leaveCommand, ctx.session);
                 }
                 case RESIGN -> {
-                    resign();
+                    var resignCommand = new Gson().fromJson(ctx.message(), ResignCommand.class);
+                    resign(resignCommand, ctx.session);
                 }
             }
         } catch (IllegalStateException e) {
@@ -105,7 +106,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         try {
             currGame.game().makeMove(makeMoveCommand.getMove());
 
-            gameService.updateGame(currGame);
+            gameService.updateGame(currGame, false);
         } catch (InvalidMoveException e) {
             connectionManager.personalMessage(session, new ErrorMessage(ERROR, "This move is not valid. Please try another."));
             return;
@@ -137,7 +138,18 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connectionManager.remove(session);
     }
 
-    private void resign() {
+    private void resign(ResignCommand resignCommand, Session session) throws ResponseException {
+        if (!userService.validAuth(resignCommand.getAuthToken())) {
+            throw new ResponseException(UnauthorizedError, errorMessageFromCode(UnauthorizedError));
+        }
+        var game = gameService.retrieveGame(resignCommand.getGameID());
 
+        gameService.updateGame(game, true);
+
+        var notification = new Notification(NOTIFICATION, String.format("%s resigned", resignCommand.getUsername()));
+        connectionManager.broadcast(session, notification, resignCommand.getGameID());
+
+        var personalNotification = new Notification(NOTIFICATION, "You have successfully resigned");
+        connectionManager.personalMessage(session, personalNotification);
     }
 }
