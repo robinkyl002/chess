@@ -59,9 +59,9 @@ public class GameService {
         }
     }
 
-    public void updateGame(GameData gameData) throws ResponseException {
+    public void updateGame(GameData gameData, boolean completed) throws ResponseException {
         try {
-                gameDAO.updateGame(gameData.gameID(), gameData);
+                gameDAO.updateGame(gameData.gameID(), gameData, completed);
         } catch (DataAccessException e) {
             throw new ResponseException(ServerError, errorMessageFromCode(ServerError) + e.getMessage());
         }
