@@ -5,7 +5,6 @@ import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import io.javalin.websocket.*;
-import model.GameData;
 import model.SessionData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
@@ -220,17 +219,5 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         var personalNotification = new Notification(NOTIFICATION, "You have successfully resigned");
         connectionManager.personalMessage(session, personalNotification);
-    }
-
-    private ChessGame.TeamColor getPlayerColor(GameData game, String username) {
-        if (username.equals(game.whiteUsername())) {
-            return WHITE;
-        }
-        else if (username.equals(game.blackUsername())) {
-            return BLACK;
-        }
-        else {
-            return null;
-        }
     }
 }
