@@ -240,6 +240,31 @@ public class ChessClient implements NotificationHandler {
         assertSignedIn();
         currentlyPlaying();
 
+        System.out.println("Are you sure you would like to resign? [Y/n]");
+        Scanner scanner = new Scanner(System.in);
+        var result = "";
+        while (result.isEmpty()) {
+            printPrompt();
+            String line = scanner.nextLine();
+
+            try {
+                result = line.toLowerCase();
+                if (line.equals("y") || line.equals("yes")) {
+                    ws.resignGame(authToken, currGameState.gameID(), username);
+                    break;
+                } else if (line.equals("n") || line.equals("no")) {
+                    printPrompt();
+                    break;
+                }
+                else {
+                    throw new  ResponseException(BadRequestError, "Invalid input. Please try again");
+                }
+            } catch (Throwable e) {
+                var msg = e.toString();
+                System.out.print(msg);
+            }
+        }
+        System.out.println();
 
         return "";
     }
