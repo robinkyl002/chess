@@ -29,12 +29,8 @@ public class ConnectionManager {
                 var session = c.getKey();
                 var data = c.getValue();
 
-                if (data.gameID() == gameID) {
-                    if (session.isOpen()) {
-                        if (!session.equals(excludeSession)) {
-                            session.getRemote().sendString(msg);
-                        }
-                    }
+                if (data.gameID() == gameID && session.isOpen() && !session.equals(excludeSession)) {
+                    session.getRemote().sendString(msg);
                 }
             }
         } catch (Exception e) {
