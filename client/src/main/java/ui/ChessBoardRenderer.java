@@ -14,7 +14,6 @@ import static ui.EscapeSequences.*;
 public class ChessBoardRenderer {
     private final static int SQUARES_ON_SIDE = 8;
     private final static String[] HORIZONTAL_HEADERS = {"a", "b", "c", "d", "e", "f", "g", "h"};
-    private final static String[] VERTICAL_HEADERS = {"8", "7", "6", "5", "4", "3", "2", "1"};
 
     public static void drawBoard (GameData gameData, ChessGame.TeamColor color, Collection<ChessMove> validMoves) {
         var gameBoard = gameData.game().getBoard();
