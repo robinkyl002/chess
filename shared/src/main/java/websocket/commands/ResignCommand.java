@@ -3,8 +3,8 @@ package websocket.commands;
 public class ResignCommand extends UserGameCommand{
     private final String username;
 
-    public ResignCommand(CommandType commandType, String authToken, Integer gameID, String username) {
-        super(commandType, authToken, gameID);
+    public ResignCommand(String authToken, Integer gameID, String username) {
+        super(CommandType.RESIGN, authToken, gameID);
         this.username = username;
     }
     public String getUsername() {
