@@ -4,6 +4,7 @@ import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.UserDAO;
 import exception.ResponseException;
+import model.AuthData;
 import model.UserData;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -66,6 +67,17 @@ public class UserService {
             var existingAuth = authDAO.getAuth(authToken);
 
             return existingAuth != null;
+        } catch (DataAccessException ex) {
+            throw new ResponseException(ServerError, errorMessageFromCode(ServerError) + ex.getMessage());
+        }
+    }
+
+    public String getUsername(String authToken) throws ResponseException {
+        try {
+            if (authToken == null || authToken.isEmpty()) {
+                throw new ResponseException(UnauthorizedError, errorMessageFromCode(UnauthorizedError));
+            }
+            return authDAO.getAuth(authToken).username();
         } catch (DataAccessException ex) {
             throw new ResponseException(ServerError, errorMessageFromCode(ServerError) + ex.getMessage());
         }
