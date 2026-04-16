@@ -17,7 +17,7 @@ import static exception.ResponseException.errorMessageFromCode;
 import static websocket.messages.ServerMessage.ServerMessageType.*;
 
 public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
-    private ConnectionManager connectionManager = new ConnectionManager();
+    private final ConnectionManager connectionManager = new ConnectionManager();
     private final GameService gameService;
     private final UserService userService;
 
@@ -70,15 +70,16 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             throw new ResponseException(UnauthorizedError, errorMessageFromCode(UnauthorizedError));
         }
 
+        String username = userService.getUsername(connectCommand.getAuthToken());
         var currGame = gameService.retrieveGame(connectCommand.getGameID());
 
         connectionManager.add(session, new SessionData(connectCommand.getAuthToken(), connectCommand.getGameID(),
                 connectCommand.isObserver()));
 
-        var color = (connectCommand.getUsername().equals(currGame.whiteUsername())) ? WHITE : BLACK;
+        var color = (username.equals(currGame.whiteUsername())) ? WHITE : BLACK;
         var message = (connectCommand.isObserver()) ?
-                String.format("%s is now observing the game", connectCommand.getUsername()) :
-                String.format("%s is now playing the game as %s", connectCommand.getUsername(), color.toString().toLowerCase());
+                String.format("%s is now observing the game", username) :
+                String.format("%s is now playing the game as %s", username, color.toString().toLowerCase());
 
         var notification = new Notification(NOTIFICATION, message);
 
@@ -112,7 +113,9 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             return;
         }
 
-        var notification =  new Notification(NOTIFICATION, String.format("%s moved from %s to %s", makeMoveCommand.getUsername(),
+        String username = userService.getUsername(makeMoveCommand.getAuthToken());
+
+        var notification =  new Notification(NOTIFICATION, String.format("%s moved from %s to %s", username,
                 makeMoveCommand.getMove().getStartPosition().toString(), makeMoveCommand.getMove().getEndPosition().toString()));
 
         connectionManager.broadcast(session, notification, makeMoveCommand.getGameID());
@@ -127,7 +130,8 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             throw new ResponseException(UnauthorizedError, errorMessageFromCode(UnauthorizedError));
         }
 
-        var message = String.format("%s left the game", leaveCommand.getUsername());
+        String username = userService.getUsername(leaveCommand.getAuthToken());
+        var message = String.format("%s left the game", username);
 
         var notification = new Notification(NOTIFICATION, message);
 
@@ -146,7 +150,8 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         gameService.updateGame(game, true);
 
-        var notification = new Notification(NOTIFICATION, String.format("%s resigned", resignCommand.getUsername()));
+        String username = userService.getUsername(resignCommand.getAuthToken());
+        var notification = new Notification(NOTIFICATION, String.format("%s resigned", username));
         connectionManager.broadcast(session, notification, resignCommand.getGameID());
 
         var personalNotification = new Notification(NOTIFICATION, "You have successfully resigned");
