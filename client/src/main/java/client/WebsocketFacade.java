@@ -87,7 +87,12 @@ public class WebsocketFacade extends Endpoint {
     }
 
     public void resignGame(String token, int gameID, String username) throws ResponseException {
-
+        try {
+            var resignCommand = new ResignCommand(token, gameID, username);
+            session.getBasicRemote().sendText(new Gson().toJson(resignCommand));
+        } catch (IOException ex) {
+            throw new ResponseException(ServerError, errorMessageFromCode(ServerError) + ex.getMessage());
+        }
     }
 
 }
