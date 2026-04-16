@@ -149,15 +149,16 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 makeMoveCommand.getMove().getStartPosition().toString(), makeMoveCommand.getMove().getEndPosition().toString()));
 
         var updatedGame = gameService.retrieveGame(makeMoveCommand.getGameID());
-        if (updatedGame.completed()) {
-            connectionManager.personalMessage(session, new ErrorMessage(ERROR, "Error: This game is already completed"));
-            throw new ResponseException(UnauthorizedError, errorMessageFromCode(UnauthorizedError));
-        }
-
-        if (updatedGame.game().isInCheckmate(color) || updatedGame.game().isInStalemate(color)) {
+        ChessGame.TeamColor nextTeam = updatedGame.game().getTeamTurn();
+        if (updatedGame.game().isInCheckmate(nextTeam)) {
             gameService.updateGame(updatedGame, true);
-            connectionManager.personalMessage(session, new Notification(NOTIFICATION, "This game is over"));
-            return;
+            connectionManager.broadcast(null, new Notification(NOTIFICATION, nextTeam + " is in checkmate"), updatedGame.gameID());
+
+        } else if (updatedGame.game().isInStalemate(nextTeam)) {
+            gameService.updateGame(updatedGame, true);
+            connectionManager.broadcast(null, new Notification(NOTIFICATION, "The game is in stalemate"), updatedGame.gameID());
+        } else if (updatedGame.game().isInCheck(nextTeam)) {
+            connectionManager.broadcast(null, new Notification(NOTIFICATION, nextTeam + " is in check"), updatedGame.gameID());
         }
 
         connectionManager.broadcast(session, notification, makeMoveCommand.getGameID());
@@ -198,7 +199,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         if (game.completed()) {
             connectionManager.personalMessage(session, new ErrorMessage(ERROR, "Error: This game is already completed"));
-        }
+            return;        }
 
         String username = userService.getUsername(resignCommand.getAuthToken());
         if (username.equals(game.whiteUsername())) {
