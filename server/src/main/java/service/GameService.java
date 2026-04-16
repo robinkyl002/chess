@@ -75,6 +75,14 @@ public class GameService {
         }
     }
 
+    public void removePlayer( int gameID, ChessGame.TeamColor playerColor) throws ResponseException {
+        try {
+            gameDAO.removePlayer(gameID, playerColor);
+        } catch (DataAccessException e) {
+            throw new ResponseException(ServerError, errorMessageFromCode(ServerError) + e.getMessage());
+        }
+    }
+
     public ListGamesResult listGames() throws ResponseException {
         try {
             Collection<GameData> games = gameDAO.listGames();

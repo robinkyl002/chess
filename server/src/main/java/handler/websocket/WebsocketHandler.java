@@ -1,9 +1,11 @@
 package handler.websocket;
 
+import chess.ChessGame;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import io.javalin.websocket.*;
+import model.GameData;
 import model.SessionData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
@@ -67,12 +69,17 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private void connect(ConnectCommand connectCommand, Session session) throws ResponseException {
         if (!userService.validAuth(connectCommand.getAuthToken())) {
+            connectionManager.personalMessage(session, new ErrorMessage(ERROR, "Error: invalid auth token"));
             throw new ResponseException(UnauthorizedError, errorMessageFromCode(UnauthorizedError));
         }
 
         String username = userService.getUsername(connectCommand.getAuthToken());
         var currGame = gameService.retrieveGame(connectCommand.getGameID());
 
+        if (currGame == null) {
+            connectionManager.personalMessage(session, new ErrorMessage(ERROR, "Error: This game does not exist"));
+            throw new ResponseException(BadRequestError, errorMessageFromCode(BadRequestError));
+        }
         connectionManager.add(session, new SessionData(connectCommand.getAuthToken(), connectCommand.getGameID(),
                 connectCommand.isObserver()));
 
@@ -92,13 +99,38 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private void makeMove(MakeMoveCommand makeMoveCommand, Session session) throws ResponseException {
         if (!userService.validAuth(makeMoveCommand.getAuthToken())) {
+            connectionManager.personalMessage(session, new ErrorMessage(ERROR, "Error: invalid auth token"));
             throw new ResponseException(UnauthorizedError, errorMessageFromCode(UnauthorizedError));
         }
 
         var currGame = gameService.retrieveGame(makeMoveCommand.getGameID());
+        if (currGame.completed()) {
+            connectionManager.personalMessage(session, new ErrorMessage(ERROR, "Error: This game is already completed"));
+            throw new ResponseException(UnauthorizedError, errorMessageFromCode(UnauthorizedError));
+        }
         var startPos = makeMoveCommand.getMove().getStartPosition();
 
-        if (currGame.game().getBoard().getPiece(startPos).getTeamColor() != makeMoveCommand.getPlayerColor()) {
+        ChessGame.TeamColor color;
+        String username = userService.getUsername(makeMoveCommand.getAuthToken());
+        var game = gameService.retrieveGame(makeMoveCommand.getGameID());
+        if (username.equals(game.whiteUsername())) {
+            color = WHITE;
+        }
+        else if (username.equals(game.blackUsername())) {
+            color = BLACK;
+        }
+        else {
+            connectionManager.personalMessage(session, new ErrorMessage(ERROR, "Error: Cannot move pieces as an observer"));
+            throw new ResponseException(BadRequestError, errorMessageFromCode(BadRequestError));
+        }
+
+        if (currGame.game().isInCheckmate(color) || currGame.game().isInStalemate(color)) {
+            gameService.updateGame(currGame, true);
+            connectionManager.personalMessage(session, new Notification(NOTIFICATION, "Error: This game is over"));
+            return;
+        }
+
+        if (currGame.game().getBoard().getPiece(startPos).getTeamColor() != color) {
             var notification = new ErrorMessage(ERROR, "You cannot move the other team's pieces");
             connectionManager.personalMessage(session, notification);
             return;
@@ -113,10 +145,20 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             return;
         }
 
-        String username = userService.getUsername(makeMoveCommand.getAuthToken());
-
         var notification =  new Notification(NOTIFICATION, String.format("%s moved from %s to %s", username,
                 makeMoveCommand.getMove().getStartPosition().toString(), makeMoveCommand.getMove().getEndPosition().toString()));
+
+        var updatedGame = gameService.retrieveGame(makeMoveCommand.getGameID());
+        if (updatedGame.completed()) {
+            connectionManager.personalMessage(session, new ErrorMessage(ERROR, "Error: This game is already completed"));
+            throw new ResponseException(UnauthorizedError, errorMessageFromCode(UnauthorizedError));
+        }
+
+        if (updatedGame.game().isInCheckmate(color) || updatedGame.game().isInStalemate(color)) {
+            gameService.updateGame(updatedGame, true);
+            connectionManager.personalMessage(session, new Notification(NOTIFICATION, "This game is over"));
+            return;
+        }
 
         connectionManager.broadcast(session, notification, makeMoveCommand.getGameID());
 
@@ -131,14 +173,20 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
 
         String username = userService.getUsername(leaveCommand.getAuthToken());
+        var game = gameService.retrieveGame(leaveCommand.getGameID());
+        if (username.equals(game.whiteUsername())) {
+            gameService.removePlayer(leaveCommand.getGameID(), WHITE);
+        }
+        else if (username.equals(game.blackUsername())) {
+            gameService.removePlayer(leaveCommand.getGameID(), BLACK);
+        }
+
+
         var message = String.format("%s left the game", username);
 
         var notification = new Notification(NOTIFICATION, message);
 
-        var personalMessage = new Notification(NOTIFICATION, "You have left the game");
-
         connectionManager.broadcast(session, notification, leaveCommand.getGameID());
-        connectionManager.personalMessage(session, personalMessage);
         connectionManager.remove(session);
     }
 
@@ -148,13 +196,40 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
         var game = gameService.retrieveGame(resignCommand.getGameID());
 
-        gameService.updateGame(game, true);
+        if (game.completed()) {
+            connectionManager.personalMessage(session, new ErrorMessage(ERROR, "Error: This game is already completed"));
+        }
 
         String username = userService.getUsername(resignCommand.getAuthToken());
+        if (username.equals(game.whiteUsername())) {
+            gameService.removePlayer(resignCommand.getGameID(), WHITE);
+        }
+        else if (username.equals(game.blackUsername())) {
+            gameService.removePlayer(resignCommand.getGameID(), BLACK);
+        }
+        else {
+            connectionManager.personalMessage(session, new ErrorMessage(ERROR, "You cannot resign the game as an observer"));
+            throw new ResponseException(BadRequestError, errorMessageFromCode(BadRequestError));
+        }
+
+        gameService.updateGame(game, true);
+
         var notification = new Notification(NOTIFICATION, String.format("%s resigned", username));
         connectionManager.broadcast(session, notification, resignCommand.getGameID());
 
         var personalNotification = new Notification(NOTIFICATION, "You have successfully resigned");
         connectionManager.personalMessage(session, personalNotification);
+    }
+
+    private ChessGame.TeamColor getPlayerColor(GameData game, String username) {
+        if (username.equals(game.whiteUsername())) {
+            return WHITE;
+        }
+        else if (username.equals(game.blackUsername())) {
+            return BLACK;
+        }
+        else {
+            return null;
+        }
     }
 }

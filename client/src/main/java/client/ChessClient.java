@@ -218,7 +218,7 @@ public class ChessClient implements NotificationHandler {
         assertSignedIn();
         currentlyPlayingOrObserving();
 
-        ws.leaveGame(authToken, currGameState.gameID(), username);
+        ws.leaveGame(authToken, currGameState.gameID(), playerColor);
         state = State.IN_LOBBY;
 
         return "";

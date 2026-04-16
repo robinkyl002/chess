@@ -103,6 +103,11 @@ class GameServiceTest {
         }
 
         @Override
+        public void removePlayer(int gameID, ChessGame.TeamColor playerColor) throws DataAccessException {
+
+        }
+
+        @Override
         public void clearGameData() throws DataAccessException {}
     }
 

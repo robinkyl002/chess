@@ -79,6 +79,23 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
+    public void removePlayer(int gameID, ChessGame.TeamColor playerColor) throws DataAccessException {
+        try {
+            GameData currGame = getGame(gameID);
+
+            if (currGame == null) {
+                throw new DataAccessException("Game does not exist");
+            }
+            var newGame = (playerColor == ChessGame.TeamColor.WHITE) ?
+                    new GameData(gameID, null, currGame.blackUsername(), currGame.gameName(), currGame.game(), false) :
+                    new GameData(gameID, currGame.whiteUsername(), null, currGame.gameName(), currGame.game(), false);
+            games.put(gameID, newGame);
+        } catch (Exception e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    @Override
     public void clearGameData() throws DataAccessException {
         try {
             if (!games.isEmpty()) {
