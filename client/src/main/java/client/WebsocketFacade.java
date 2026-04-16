@@ -69,7 +69,7 @@ public class WebsocketFacade extends Endpoint {
 
     public void leaveGame(String token, int gameID, String username) throws ResponseException {
         try {
-            var leaveCommand = new LeaveCommand(UserGameCommand.CommandType.LEAVE, token, gameID, username);
+            var leaveCommand = new LeaveCommand(UserGameCommand.CommandType.LEAVE, token, gameID);
             session.getBasicRemote().sendText(new Gson().toJson(leaveCommand));
         } catch (IOException ex) {
             throw new ResponseException(ServerError, errorMessageFromCode(ServerError));
@@ -88,7 +88,7 @@ public class WebsocketFacade extends Endpoint {
 
     public void resignGame(String token, int gameID, String username) throws ResponseException {
         try {
-            var resignCommand = new ResignCommand(token, gameID, username);
+            var resignCommand = new ResignCommand(token, gameID);
             session.getBasicRemote().sendText(new Gson().toJson(resignCommand));
         } catch (IOException ex) {
             throw new ResponseException(ServerError, errorMessageFromCode(ServerError) + ex.getMessage());
