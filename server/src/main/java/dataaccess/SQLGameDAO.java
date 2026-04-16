@@ -88,13 +88,14 @@ public class SQLGameDAO implements GameDAO {
     }
 
     @Override
-    public void updateGame(int gameID, GameData updatedGame) throws DataAccessException {
+    public void updateGame(int gameID, GameData updatedGame, boolean completed) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "UPDATE game SET chessGame=? WHERE id=?";
+            var statement = "UPDATE game SET chessGame=?, completed=? WHERE id=?";
             try(PreparedStatement ps = conn.prepareStatement(statement)) {
                 String chessGame = new Gson().toJson(updatedGame.game());
                 ps.setString(1, chessGame);
-                ps.setInt(2, gameID);
+                ps.setBoolean(2, completed);
+                ps.setInt(3, gameID);
                 ps.executeUpdate();
 
                 int updates = ps.getUpdateCount();
