@@ -249,10 +249,10 @@ public class ChessClient implements NotificationHandler {
 
             try {
                 result = line.toLowerCase();
-                if (line.equals("y") || line.equals("yes")) {
+                if (result.equals("y") || result.equals("yes")) {
                     ws.resignGame(authToken, currGameState.gameID(), username);
                     break;
-                } else if (line.equals("n") || line.equals("no")) {
+                } else if (result.equals("n") || result.equals("no")) {
                     printPrompt();
                     break;
                 }
